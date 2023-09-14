@@ -1,0 +1,288 @@
+.banner {
+  $aqua: #1fcfcf;
+  $aquaTrans: #1fcfcfd6;
+  $pink: #ee40bd;
+  $darkAqua: #219595;
+  $darkerAqua: #0f4646;
+
+  background-color: $darkAqua;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: $aqua;
+  }
+
+  svg {
+    height: 1.5rem;
+    width: auto;
+
+    path {
+      fill: white;
+    }
+  }
+}
+
+.userFlow {
+  $aqua: #1fcfcf;
+  $aquaTrans: #1fcfcfd6;
+  $pink: #ee40bd;
+  $darkAqua: #219595;
+  $darkerAqua: #0f4646;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  background-color: #101010;
+  border-radius: 0.5rem;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  .left {
+    flex: 1;
+    width: 100%;
+    border-radius: 0.25rem 0rem 0rem 0.25rem;
+    height: 100%;
+    min-height: 38rem;
+
+    background-image: url("../../assets/images/loginBackground.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+  }
+
+  .right {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: left;
+    justify-content: center;
+    padding: 1rem 2rem;
+
+    .title {
+      font-size: 2rem;
+      font-weight: 300;
+      color: white;
+    }
+
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      .textInputRoot {
+        .textInputLabel {
+          color: white;
+          font-weight: 300;
+          font-size: 1rem;
+          filter: brightness(0.75);
+          transition: filter 0.2s, color 0.2s;
+        }
+
+        .textInput {
+          border-radius: 0;
+          font-weight: 300;
+          font-size: 1rem;
+          width: 100%;
+          min-height: 3rem;
+
+          background-color: transparent;
+          border: 1px solid #393939;
+          border-radius: 0.25rem;
+          color: white;
+          // filter: brightness(0.75);
+
+          transition: filter 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        &:hover,
+        &:focus {
+          .textInputLabel {
+            filter: brightness(1);
+            color: $aqua;
+          }
+
+          .textInput {
+            border-color: $aqua;
+            filter: brightness(1);
+          }
+        }
+      }
+
+      button {
+        background-color: $aqua;
+        transition: background-color 0.2s;
+        width: 100%;
+        font-weight: 300;
+        font-size: 1rem;
+        height: 2.25rem;
+
+        &:hover,
+        &:focus {
+          border: 1px solid $aqua;
+          background-color: $aquaTrans;
+        }
+      }
+
+      .loading {
+        height: 2.25rem;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .errorText {
+        text-align: center;
+        color: white;
+      }
+    }
+
+    .separator {
+      filter: brightness(0.75);
+
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      align-items: center;
+      gap: 0.5rem;
+
+      margin-bottom: -0.5rem;
+      margin-top: -0.5rem;
+
+      .line {
+        border-bottom: 0.5px solid white;
+        width: 100%;
+      }
+    }
+
+    .alternatives {
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
+      width: 100%;
+
+      .alternative {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        gap: 1rem;
+        border-radius: 0.25rem;
+        transition: background-color 0.2s;
+        font-size: 0.75rem;
+
+        &:hover,
+        &:focus {
+          cursor: pointer;
+        }
+
+        svg {
+          width: 1.25rem;
+          height: auto;
+
+          path {
+            transition: fill 0.2s;
+          }
+        }
+
+        &.discord {
+          border: 1px solid #5865f2;
+          background-color: #5865f2;
+
+          svg {
+            path {
+              fill: white;
+            }
+          }
+
+          &:hover,
+          &:focus {
+            background-color: #4950bd;
+            // border: 1px solid #5865f2;
+          }
+        }
+
+        &.google {
+          border: 1px solid #ea4335;
+          background-color: #ea4335;
+
+          svg {
+            path {
+              // fill: white;
+            }
+          }
+
+          &:hover,
+          &:focus {
+            background-color: #ba3729;
+            // border: 1px solid #ea4335;
+          }
+        }
+
+        &.github {
+          border: 1px solid #ffffff;
+          background-color: #ffffff;
+          color: black;
+          font-weight: 500;
+
+          svg {
+            path {
+              fill: #000000;
+            }
+          }
+
+          &:hover,
+          &:focus {
+            background-color: #d6d6d6;
+            // border: 1px solid #ffffff;
+          }
+        }
+      }
+
+      @media (max-width: 1500px) {
+        flex-direction: column;
+
+        .alternative {
+          font-size: 1rem;
+
+          svg {
+            width: 1.5rem;
+          }
+        }
+      }
+    }
+
+    .wrongPage {
+      width: 100%;
+      text-align: center;
+
+      .link {
+        text-decoration: none;
+        transition: color 0.2s, text-decoration 0.2s;
+
+        &:hover,
+        &:focus {
+          color: $aqua;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

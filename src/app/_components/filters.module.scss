@@ -1,0 +1,280 @@
+.filters {
+  $aqua: #1fcfcf;
+  $darkAqua: #219595;
+  $darkerAqua: #0f4646;
+  $pink: #ee40bd;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  gap: 2rem;
+
+  font-size: 1rem;
+
+  .popoverDropdown {
+    border: none;
+    border-radius: 0.5rem;
+  }
+
+  .filterTargetRoot {
+    background-color: $darkerAqua;
+    font-weight: 100;
+    transition: filter 0.2s;
+    filter: brightness(0.85);
+    height: 2.5rem;
+    border-radius: 0.25rem;
+
+    &:hover {
+      filter: brightness(1);
+    }
+
+    [aria-expanded="true"] {
+      filter: brightness(1);
+    }
+
+    span {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+
+      svg {
+        fill: $aqua;
+        height: 1rem;
+        width: auto;
+      }
+    }
+  }
+
+  .filterDropdown {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 2rem;
+    padding: 1rem 2rem;
+    width: 100%;
+    background-color: $darkerAqua;
+    border-radius: 0.25rem;
+  }
+
+  .paginate {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+
+    .actionIcon {
+      border-radius: 50%;
+      transition: background-color 0.2s;
+
+      svg {
+        path {
+          fill: white;
+        }
+      }
+
+      &:hover {
+        background-color: rgba(31, 207, 207, 0.36);
+      }
+    }
+  }
+
+  .filter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    filter: brightness(0.85);
+    transition: filter 0.2s ease-in-out;
+
+    &.pageLabel {
+      text-align: center;
+      white-space: nowrap;
+      width: min-content;
+    }
+
+    &:hover {
+      filter: brightness(1);
+    }
+
+    .button {
+      background-color: $darkAqua;
+      font-weight: 400;
+    }
+
+    .dropdown {
+      padding: 0.5rem 1rem;
+      background-color: $darkAqua;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      border: none;
+
+      .popover {
+        &.protocols {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          .protocol {
+            display: flex;
+            gap: 1rem;
+            flex-direction: row;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+
+            &:hover,
+            &.selected {
+              background-color: $aqua;
+            }
+
+            .checkboxInput {
+              cursor: pointer;
+              border-radius: 0.25rem;
+
+              &:checked {
+                background-color: $aqua;
+                border-color: $aqua;
+              }
+            }
+
+            .protocolInfo {
+              display: flex;
+              flex-direction: row;
+              gap: 0.5rem;
+              align-items: center;
+            }
+          }
+        }
+      }
+    }
+
+    .selectInput {
+      background-color: transparent;
+      color: white;
+      border: none;
+      border-radius: 2;
+      font-weight: 400;
+      background-color: $darkAqua;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    .selectDropdown {
+      background-color: $darkerAqua;
+      border: none;
+      border-radius: 0.25rem;
+    }
+
+    .selectItem {
+      color: white;
+      padding: 0.5rem;
+
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      cursor: pointer;
+      border-radius: 0.25rem;
+
+      &:hover,
+      &:focus {
+        background-color: $darkAqua;
+      }
+    }
+
+    .selectValue {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    [aria-selected="true"],
+    [data-selected="true"],
+    [data-hovered="true"] {
+      background-color: $darkAqua;
+    }
+  }
+
+  .search {
+    background-color: $darkerAqua;
+    height: 2.5rem;
+    border-radius: 0.25rem;
+
+    filter: brightness(0.85);
+    transition: filter 0.2s;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1rem;
+    gap: 1rem;
+
+    &:hover,
+    &:focus,
+    &:focus-within {
+      filter: brightness(1);
+    }
+
+    .left {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+
+      input {
+        background-color: transparent;
+        border: none;
+        color: white;
+        font-size: 1rem;
+        font-weight: 100;
+        max-width: 3rem;
+
+        &:focus {
+          outline: none;
+        }
+
+        &::placeholder {
+          color: white;
+          filter: brightness(0.75);
+        }
+      }
+    }
+
+    .right {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+
+      svg {
+        fill: $aqua;
+        height: 1.75rem;
+        width: 1.75rem;
+        cursor: pointer;
+        transition: filter 0.2s;
+
+        &:hover {
+          filter: brightness(1);
+        }
+
+        &.clear {
+          height: 1.4rem;
+          width: 1.4rem;
+          margin-right: 0.5rem;
+        }
+      }
+    }
+  }
+}

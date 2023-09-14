@@ -1,0 +1,42 @@
+.exports {
+  $aqua: #1fcfcf;
+  $darkAqua: #219595;
+  $darkerAqua: #0f4646;
+  $pink: #ee40bd;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+
+  .export {
+    display: flex;
+    flex: row;
+    align-items: center;
+    gap: 0.5rem;
+
+    font-size: 1rem;
+    background-color: $darkerAqua;
+    padding: 0rem 1rem;
+    height: 2.5rem;
+    border-radius: 0.25rem;
+
+    filter: brightness(0.85);
+    transition: filter 0.2s;
+    cursor: pointer;
+
+    &:hover {
+      filter: brightness(1);
+    }
+
+    svg {
+      height: 1rem;
+      width: auto;
+
+      path {
+        fill: $aqua;
+      }
+    }
+  }
+}

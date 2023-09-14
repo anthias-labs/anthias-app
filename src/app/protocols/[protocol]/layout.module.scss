@@ -1,0 +1,29 @@
+.protocolLayout {
+  $aqua: #1fcfcf;
+  $pink: #ee40bd;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+
+  .title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    font-size: 1.5rem;
+    gap: 1rem;
+
+    img {
+      height: 3rem;
+      width: auto;
+    }
+
+    svg {
+      width: 0.5rem;
+      height: auto;
+    }
+  }
+}

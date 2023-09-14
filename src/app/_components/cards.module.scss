@@ -1,0 +1,83 @@
+.cards {
+  $aqua: #1fcfcf;
+  $pink: #ee40bd;
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 2rem;
+
+  .cardSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    margin-top: 2rem;
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      align-content: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1rem 0rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.2s;
+
+      &:nth-child(odd) {
+        background-color: rgba(31, 207, 207, 0.24);
+      }
+      &:nth-child(even) {
+        background-color: rgba(33, 100, 100, 0.3);
+      }
+
+      &:hover {
+        &:nth-child(odd) {
+          background-color: rgba(31, 207, 207, 0.36);
+        }
+        &:nth-child(even) {
+          background-color: rgba(33, 100, 100, 0.42);
+        }
+      }
+
+      .cardTitle {
+        text-align: center;
+        font-weight: 300;
+
+        filter: brightness(0.5);
+        transition: filter 0.2s;
+      }
+
+      .cardValue {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        text-align: center;
+        font-weight: 600;
+        font-size: 1.25rem;
+
+        .skeleton {
+          @keyframes pulse {
+            0% {
+              background-color: rgba(0, 0, 0, 0.6);
+            }
+            50% {
+              background-color: rgba(0, 0, 0, 0.2);
+            }
+            100% {
+              background-color: rgba(0, 0, 0, 0.6);
+            }
+          }
+
+          animation: custom-animation 1.5s ease-in-out infinite !important;
+        }
+      }
+
+      &:hover {
+        .cardTitle {
+          filter: brightness(1);
+        }
+      }
+    }
+  }
+}
