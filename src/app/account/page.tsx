@@ -53,7 +53,7 @@ export default function AccountPage() {
         const hash = getHash();
         const { data, error } = await supabase
           .from("_referral_codes")
-          .insert([{ auth_uid: uid, code: hash, code_count: 0 }]);
+          .insert([{ auth_uid: uid, code: hash, max_count: 10 }]);
 
         if (error) {
           console.log(error);
@@ -221,7 +221,7 @@ export default function AccountPage() {
               </h2>
               <div className={styles.codeBox}>
                 <h3>
-                  {referralData.code_count * 10} <span>ANTH</span>
+                  {referralData.anth_points} <span>ANTH</span>
                 </h3>
               </div>
             </div>
@@ -229,7 +229,7 @@ export default function AccountPage() {
               <h2>Global Leaderboard Rank</h2>
               <div className={styles.codeBox}>
                 <h3>
-                  <span>#33</span> / 200
+                  <span>#{referralData.rank}</span> / {referralData.total_users}
                 </h3>
               </div>
             </div>

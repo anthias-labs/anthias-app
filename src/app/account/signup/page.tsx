@@ -175,7 +175,7 @@ export default function SingUp() {
     if (data) {
       console.log("provider data", data);
 
-      handleReferral(data.user.id);
+      // handleReferral(data.user.id);
     }
 
     return data;
