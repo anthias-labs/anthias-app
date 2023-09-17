@@ -229,7 +229,7 @@ export default function AccountPage() {
               <h2>Global Leaderboard Rank</h2>
               <div className={styles.codeBox}>
                 <h3>
-                  <span>#{referralData.rank}</span> / {referralData.total_users}
+                  <span>#{referralData.rank}</span>/{referralData.total_users}
                 </h3>
               </div>
             </div>
