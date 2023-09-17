@@ -101,14 +101,8 @@ export function protocolToTitle(protocol: string): string {
 
 import crypto from "crypto";
 
-export function getHashes(num: number = 10) {
-  let hashes = [];
-
-  for (let i = 0; i < num; i++) {
-    const randomData = crypto.randomBytes(21).toString("hex");
-    const hash = crypto.createHash("sha256").update(randomData).digest("hex");
-    hashes.push(hash.slice(2, 42));
-  }
-
-  return hashes;
+export function getHash() {
+  const randomData = crypto.randomBytes(21).toString("hex");
+  const hash = crypto.createHash("sha256").update(randomData).digest("hex");
+  return hash.substring(0, 16);
 }

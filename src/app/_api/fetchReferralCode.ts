@@ -2,7 +2,7 @@
 import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
-export default async function fetchReferralCodes(uid: string) {
+export default async function fetchReferralCode(uid: string) {
   const supabase = createServerActionClient({ cookies });
 
   const { data, error } = await supabase
