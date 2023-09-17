@@ -19,6 +19,17 @@ export default async function fetchReferralCode(uid: string) {
   if (codeData && codeData.length > 0) {
     retData = codeData[0];
 
+    // Fetch the total number of users
+    const { data: totalUserData, error: totalUserError } = await supabase
+      .from("_referral_codes")
+      .select("*");
+
+    if (totalUserError) {
+      console.error(totalUserError);
+    } else {
+      retData.total_users = totalUserData.length;
+    }
+
     // Fetch the number of times the referral code has been used
     const { data: referralData, error: referralError } = await supabase
       .from("_referrals")
@@ -68,7 +79,6 @@ export default async function fetchReferralCode(uid: string) {
         .sort((a, b) => b[1] - a[1])
         .map((entry) => entry[0]);
       retData.rank = sortedCodes.indexOf(retData.code) + 1; // +1 to get 1-based rank
-      retData.total_users = sortedCodes.length; // Total unique referral codes
     }
   }
 
