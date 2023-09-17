@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import Link from "next/link";
 
 export default function SingUp() {
@@ -44,6 +45,23 @@ export default function SingUp() {
     }
 
     router.push(`/account/signup?${newParams.toString()}`, { scroll: false });
+  }
+
+  async function handleReferral(uid) {
+    if (referral === "") {
+      return;
+    }
+
+    const { data, error } = await supabase.from("_referrals").insert({
+      code: referral,
+      referred_uid: uid,
+    });
+
+    if (error) {
+      console.log(error);
+    }
+
+    return data;
   }
 
   const form = useForm({
@@ -103,10 +121,11 @@ export default function SingUp() {
     let { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
-      // options: {
-      //   emailRedirectTo: "https://app.anthias.xyz",
-      // },
     });
+
+    if (data) {
+      handleReferral(data.user.id);
+    }
 
     if (error) {
       if (
@@ -131,22 +150,35 @@ export default function SingUp() {
   }
 
   async function handleProviderSignUp(provider) {
+    let data, error;
+
     if (provider === "google") {
-      await supabase.auth.signInWithOAuth({
+      ({ data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           queryParams: {
             access_type: "offline",
             prompt: "consent",
           },
-          // redirectTo: `${window.location.origin}/account`,
         },
-      });
+      }));
     } else {
-      await supabase.auth.signInWithOAuth({
+      ({ data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
-      });
+      }));
     }
+
+    if (error) {
+      console.log(error);
+    }
+
+    if (data) {
+      console.log("provider data", data);
+
+      // handleReferral(data.user.id);
+    }
+
+    return data;
   }
 
   return (
@@ -171,7 +203,7 @@ export default function SingUp() {
       >
         <div className={styles.left} />
         <div className={styles.right}>
-          <div className={styles.title}>Sign Up For Anthias</div>
+          {/* <div className={styles.title}>Sign Up For Anthias</div> */}
           <form
             onSubmit={form.onSubmit((values) => {
               !loading && handleFormSubmit(values);
