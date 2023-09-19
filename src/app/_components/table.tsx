@@ -17,7 +17,6 @@ import { motion } from "framer-motion";
 import { titleCase } from "@/app/_utils/textHandling";
 import Image from "next/image";
 import defaultImg from "@/assets/icons/defaultProtocol.svg";
-import fetchProtocolIcons from "../_api/fetchProtocolIcons";
 
 export default function Table({
   tableProps,
@@ -115,7 +114,7 @@ export default function Table({
 
                 let className =
                   key === "address"
-                    ? styles.main
+                    ? styles.address
                     : key === "total_supplied" || key === "total_borrowed"
                     ? styles.sortable
                     : styles.th;
@@ -178,7 +177,7 @@ export default function Table({
                           let value: any = data[key] ? data[key] : "";
 
                           if (key === "chain") {
-                            value = value + " " + data["version"];
+                            value = titleCase(value) + " v" + data["version"];
                           } else if (
                             key === "token_symbol" ||
                             key === "underlying_symbol"
@@ -202,7 +201,7 @@ export default function Table({
 
                           let className =
                             key === "address"
-                              ? `${styles.td} ${styles.main}`
+                              ? `${styles.td} ${styles.address}`
                               : key === "health_factor"
                               ? getHealthFactorClass(
                                   Number(
@@ -211,6 +210,9 @@ export default function Table({
                                   styles
                                 )
                               : styles.td;
+
+                          if (columnIndex === 0)
+                            className = `${styles.first} ${className}`;
 
                           return (
                             <div key={columnIndex} className={className}>

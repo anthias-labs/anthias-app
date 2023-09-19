@@ -66,7 +66,7 @@
             justify-content: flex-start;
             gap: 0.25rem;
 
-            &.main {
+            &.address {
               flex: 2;
             }
 
@@ -145,9 +145,7 @@
             justify-content: flex-start;
             gap: 0.25rem;
 
-            &.main {
-              flex: 2;
-
+            &.first {
               span {
                 text-decoration: none;
                 background-image: linear-gradient($aqua, $aqua);
@@ -159,6 +157,10 @@
                   color 0.2s ease-in-out;
                 padding-bottom: 2px;
               }
+            }
+
+            &.address {
+              flex: 2;
             }
 
             .iconEntry {
@@ -231,7 +233,7 @@
           }
 
           &:hover {
-            .main {
+            .first {
               span {
                 background-size: 100% 0.8px;
                 color: $aqua;

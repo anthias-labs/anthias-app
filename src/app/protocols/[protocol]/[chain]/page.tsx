@@ -26,16 +26,13 @@ export default async function ProtocolChainPage({ params }) {
           mode: "positions",
           name: "Positions",
         },
-        // {
-        //   mode: "markets",
-        //   name: "Markets",
-        // },
+        {
+          mode: "markets",
+          name: "Markets",
+        },
       ],
 
-      icons: [
-        walletImg,
-        // marketImg
-      ],
+      icons: [walletImg, marketImg],
     },
 
     dataFetch: {

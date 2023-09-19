@@ -9,7 +9,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
-import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+import {
+  GoogleReCaptchaProvider,
+  GoogleReCaptcha,
+} from "react-google-recaptcha-v3";
 import Link from "next/link";
 
 export default function SingUp() {
@@ -19,6 +22,8 @@ export default function SingUp() {
   const searchParams = useSearchParams();
   const [referral, setReferral] = useState("");
   const router = useRouter();
+
+  const recaptchaKeyId = process.env.RECAPTCHA_KEY_ID;
 
   useEffect(() => {
     async function checkSession() {
@@ -64,6 +69,10 @@ export default function SingUp() {
     return data;
   }
 
+  function handleVerify(token) {
+    console.log(token);
+  }
+
   const form = useForm({
     initialValues: {
       email: "",
@@ -103,16 +112,11 @@ export default function SingUp() {
     try {
       setErrorText("");
       setLoading(true);
-      const user = await handleEmailSignUp(values);
-      console.log(user);
-      if (user.user) {
-        setErrorText(
-          "Sign Up Successful! Please check your email for confirmation."
-        );
-      }
+      await handleEmailSignUp(values);
       setLoading(false);
     } catch (error) {
       console.log(error);
+
       setLoading(false);
     }
   }
@@ -121,64 +125,50 @@ export default function SingUp() {
     let { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
+      options: {
+        data: {
+          referral_code: referral,
+        },
+      },
     });
 
-    if (data) {
-      handleReferral(data.user.id);
-    }
-
     if (error) {
-      if (
-        error
-          .toString()
-          .includes("For security purposes, you can only request this after")
-      ) {
-        const timeToWait = error
-          .toString()
-          .split("after ")[1]
-          .split(" seconds")[0];
-        setErrorText(
-          `Something went wrong. Please try again in ${timeToWait} seconds.`
-        );
-      } else {
-        setErrorText("Something went wrong. Please Try again.");
-      }
       console.log(error);
+      setErrorText("Something went wrong. Please Try again.");
+    } else if (data) {
+      handleReferral(data.user.id);
+      setErrorText(
+        "Sign Up Successful! Please check your email for confirmation."
+      );
     }
 
     return data;
   }
 
-  async function handleProviderSignUp(provider) {
+  async function handleProvider(provider) {
     let data, error;
 
     if (provider === "google") {
       ({ data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
+        provider: provider,
         options: {
           queryParams: {
             access_type: "offline",
             prompt: "consent",
           },
+          redirectTo: `${window.location.origin}/account`,
         },
       }));
     } else {
       ({ data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
+        options: {
+          redirectTo: `${window.location.origin}/account`,
+        },
       }));
     }
 
-    if (error) {
-      console.log(error);
-    }
-
-    if (data) {
-      console.log("provider data", data);
-
-      // handleReferral(data.user.id);
-    }
-
-    return data;
+    console.log("provider data", data);
   }
 
   return (
@@ -220,6 +210,7 @@ export default function SingUp() {
               }}
               value={referral}
               onChange={(e) => {
+                setReferral(e.target.value);
                 handleReferralCodeChange(e.target.value);
               }}
             />
@@ -255,6 +246,9 @@ export default function SingUp() {
               <p className={styles.errorText}>{errorText}</p>
             )}
           </form>
+          <GoogleReCaptchaProvider reCaptchaKey={recaptchaKeyId}>
+            <GoogleReCaptcha onVerify={handleVerify} />
+          </GoogleReCaptchaProvider>
           <div className={styles.separator}>
             <div className={styles.line} />
             or
@@ -264,7 +258,7 @@ export default function SingUp() {
             <div
               className={`${styles.alternative} ${styles.discord}`}
               onClick={() => {
-                handleProviderSignUp("discord");
+                handleProvider("discord");
               }}
             >
               <svg
@@ -281,7 +275,7 @@ export default function SingUp() {
             <div
               className={`${styles.alternative} ${styles.google}`}
               onClick={() => {
-                handleProviderSignUp("google");
+                handleProvider("google");
               }}
             >
               <svg
@@ -314,7 +308,7 @@ export default function SingUp() {
             <div
               className={`${styles.alternative} ${styles.github}`}
               onClick={() => {
-                handleProviderSignUp("github");
+                handleProvider("github");
               }}
             >
               <svg

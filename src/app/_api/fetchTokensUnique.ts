@@ -129,7 +129,7 @@ export default async function fetchTokensUnique(token?: string) {
         lowest_borrow_rate: item.lowest_borrow_rate,
         highest_supply_rate: item.highest_supply_rate,
         highest_collateral_factor: item.highest_collateral_factor,
-        
+
         protocol_names: Array.from(item.protocol_names!),
         protocols: Array.from(item.protocols!),
       };

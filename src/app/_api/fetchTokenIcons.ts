@@ -1,22 +1,22 @@
-"use server";
+"use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import blobToBase64 from "./blobToBase64";
 
-export default async function fetchTokenIcons(tokens) {
+export default function fetchTokenIcons(tokens) {
   const supabase = createClientComponentClient();
 
-  const promises = tokens.map(async (token: string) => {
-    console.log("token name", token);
-
+  const promises = tokens.map(async (token) => {
     const { data, error } = await supabase.storage
       .from("token_icons")
-      .download(`${token.toString().toLowerCase()}`);
+      .download(`${token.underlying_symbol}`);
 
     if (error) {
       console.log(error);
     }
 
-    return data;
+    const base64Icon = await blobToBase64(data);
+    return base64Icon;
   });
 
   return Promise.all(promises);

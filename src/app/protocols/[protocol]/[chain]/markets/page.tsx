@@ -27,13 +27,16 @@ export default async function MarketsPage({ params }) {
           view: "table",
           name: "Table",
         },
-        {
-          view: "graph",
-          name: "Graph",
-        },
+        // {
+        //   view: "graph",
+        //   name: "Graph",
+        // },
       ],
 
-      icons: [tableImg, graphImg],
+      icons: [
+        tableImg,
+        // graphImg
+      ],
     },
 
     dataFetch: {
