@@ -6,7 +6,6 @@ import tokensToProtocolNames from "../_utils/tokensToProtocolNames";
 
 export default async function Tokens() {
   const initialData = await fetchTokensUnique();
-  const initialIcons = await fetchTokenIcons(initialData);
 
   const protocolNames = tokensToProtocolNames(initialData);
   const protocolIcons = await fetchProtocolIcons(protocolNames, true);
@@ -46,11 +45,5 @@ export default async function Tokens() {
     },
   };
 
-  return (
-    <Table
-      tableProps={tableProps}
-      initialData={initialData}
-      initialIcons={initialIcons}
-    />
-  );
+  return <Table tableProps={tableProps} initialData={initialData} />;
 }

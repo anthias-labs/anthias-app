@@ -29,21 +29,17 @@ export default async function HomePage() {
           name: "Protocols",
           mode: "protocols",
         },
-        // {
-        //   name: "Tokens",
-        //   mode: "tokens",
-        // },
+        {
+          name: "Tokens",
+          mode: "tokens",
+        },
         {
           name: "Account",
           mode: "account",
         },
       ],
 
-      icons: [
-        protocolsImg,
-        //  tokensImg,
-        fishImg,
-      ],
+      icons: [protocolsImg, tokensImg, fishImg],
     },
 
     dataFetch: {

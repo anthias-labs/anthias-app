@@ -89,26 +89,30 @@ export default function Login() {
     return data;
   }
 
-  async function handleProviderLogin(provider) {
+  async function handleProvider(provider) {
+    let data, error;
+
     if (provider === "google") {
-      await supabase.auth.signInWithOAuth({
-        provider: "google",
+      ({ data, error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
         options: {
           queryParams: {
             access_type: "offline",
             prompt: "consent",
           },
-          // redirectTo: `${window.location.origin}/account`,
+          redirectTo: `${window.location.origin}/account`,
         },
-      });
+      }));
     } else {
-      await supabase.auth.signInWithOAuth({
+      ({ data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
-        // options: {
-        //   redirectTo: `${window.location.origin}/account`,
-        // },
-      });
+        options: {
+          redirectTo: `${window.location.origin}/account`,
+        },
+      }));
     }
+
+    // const oAuthToken = data.session.provider_token;
   }
 
   return (
@@ -172,7 +176,7 @@ export default function Login() {
           <div
             className={`${styles.alternative} ${styles.discord}`}
             onClick={() => {
-              handleProviderLogin("discord");
+              handleProvider("discord");
             }}
           >
             <svg
@@ -189,7 +193,7 @@ export default function Login() {
           <div
             className={`${styles.alternative} ${styles.google}`}
             onClick={() => {
-              handleProviderLogin("google");
+              handleProvider("google");
             }}
           >
             <svg
@@ -222,7 +226,7 @@ export default function Login() {
           <div
             className={`${styles.alternative} ${styles.github}`}
             onClick={() => {
-              handleProviderLogin("github");
+              handleProvider("github");
             }}
           >
             <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">

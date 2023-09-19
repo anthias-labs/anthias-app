@@ -10,7 +10,7 @@ interface DataPoint {
 }
 
 interface TransformedDataEntry {
-  token_symbol: string;
+  underlying_symbol: string;
   total_supplied: number;
   total_borrowed: number;
 }
@@ -20,7 +20,8 @@ export default async function fetchProtocolMarkets(
   params
 ): Promise<TransformedDataEntry[] | null> {
   const supabase = createServerActionClient({ cookies });
-  let transformedData: { [symbol: string]: TransformedDataEntry } = {};
+  let transformedData: { [underlying_symbol: string]: TransformedDataEntry } =
+    {};
 
   let query = supabase.from(`${protocol}_balances`).select("*").limit(1500);
 
@@ -35,7 +36,7 @@ export default async function fetchProtocolMarkets(
     data.forEach((dataPoint: DataPoint) => {
       if (!transformedData[dataPoint.symbol]) {
         transformedData[dataPoint.symbol] = {
-          token_symbol: dataPoint.symbol,
+          underlying_symbol: dataPoint.symbol,
           total_supplied: 0,
           total_borrowed: 0,
         };
@@ -50,8 +51,8 @@ export default async function fetchProtocolMarkets(
 
     data = Object.values(transformedData).map((item) => {
       return {
-        token_symbol: item.token_symbol,
-        name: item.token_symbol,
+        underlying_symbol: item.underlying_symbol,
+        name: item.underlying_symbol,
         total_supplied: item.total_supplied,
         total_borrowed: item.total_borrowed,
       };

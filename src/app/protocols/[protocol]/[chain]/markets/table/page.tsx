@@ -21,12 +21,12 @@ export default async function MarketsTable({ params, searchParams }) {
 
     columns: {
       labels: ["Token", "Total Supplied (USD)", "Total Borrowed (USD)"],
-      keys: ["token_symbol", "total_supplied", "total_borrowed"],
+      keys: ["underlying_symbol", "total_supplied", "total_borrowed"],
     },
 
     link: {
       base: "https://etherscan.io/token",
-      key: "token_symbol",
+      key: "underlying_symbol",
     },
 
     dataFetch: {
@@ -49,14 +49,5 @@ export default async function MarketsTable({ params, searchParams }) {
   const urlSearchParams = new URLSearchParams(searchParams);
   const initialData = await fetchProtocolMarkets(protocol, urlSearchParams);
 
-  const token_symbols = initialData.map((market) => market.token_symbol);
-  const initialIcons = await fetchTokenIcons(token_symbols);
-
-  return (
-    <Table
-      tableProps={tableProps}
-      initialData={initialData}
-      initialIcons={initialIcons}
-    />
-  );
+  return <Table tableProps={tableProps} initialData={initialData} />;
 }

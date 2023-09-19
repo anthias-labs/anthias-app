@@ -18,6 +18,7 @@ import graphImg from "@/assets/icons/graph.svg";
 import fetchSession from "../_api/fetchSession";
 import fetchProtocolIcons from "../_api/fetchProtocolIcons";
 import fetchProtocolTokenIcons from "../_api/fetchProtocolTokenIcons";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 import { titleCase } from "../_utils/textHandling";
 import { useEffect, useState } from "react";
@@ -25,6 +26,8 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 export default function Navbar({ protocols }) {
+  const supabase = createClientComponentClient();
+
   const pathname = usePathname();
   const [session, setSession] = useState(null);
   const [selectedPath, setSelectedPath] = useState([]);
@@ -104,11 +107,11 @@ export default function Navbar({ protocols }) {
     //   value: "wallets",
     //   icon: walletsImg || defaultImg,
     // },
-    // tokens: {
-    //   label: "Tokens",
-    //   value: "tokens",
-    //   icon: tokensImg,
-    // },
+    tokens: {
+      label: "Tokens",
+      value: "tokens",
+      icon: tokensImg,
+    },
     account: {
       label: "Account",
       value: "account",
@@ -118,15 +121,20 @@ export default function Navbar({ protocols }) {
   };
 
   useEffect(() => {
-    async function fetchSessionData() {
-      const session = await fetchSession();
-      setSession(session);
+    async function fetchSession() {
+      const session = await supabase.auth.getSession();
+      setSession(session.data.session);
     }
-    fetchSessionData();
+    fetchSession();
 
     const newSelectedPath = pathname.split("/").filter((path) => path !== "");
     setSelectedPath(newSelectedPath);
   }, [pathname]);
+
+  supabase.auth.onAuthStateChange((event, session) => {
+    console.log(event, session);
+    // setSession(session);
+  });
 
   function SelectItem({ value, label, icon, index, ...others }) {
     let hrefArr = selectedPath.slice(0, index + 1);
@@ -197,9 +205,10 @@ export default function Navbar({ protocols }) {
           selectedPath.map((path, index) => {
             let directory = pathOptions;
             for (let i = 0; i < index; i++) {
-              directory = directory[selectedPath[i]].subPaths
-                ? directory[selectedPath[i]].subPaths
-                : null;
+              directory =
+                directory && directory[selectedPath[i]].subPaths
+                  ? directory[selectedPath[i]].subPaths
+                  : null;
             }
             const isLast = index === selectedPath.length - 1;
 
@@ -314,7 +323,7 @@ export default function Navbar({ protocols }) {
       </div>
 
       <div className={styles.section}>
-        {session && session.data.session ? (
+        {session ? (
           <Link
             href="/account"
             rel="noreferrer"
