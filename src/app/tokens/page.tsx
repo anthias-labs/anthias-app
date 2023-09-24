@@ -21,10 +21,10 @@ export default async function Tokens({ searchParams }) {
   const tableProps = {
     title: "Select a Token",
 
-    defaultFilters: {
-      limit: 10,
-      paginate: [1, 10],
-    },
+    // defaultFilters: {
+    //   limit: 10,
+    //   paginate: [1, 10],
+    // },
 
     columns: {
       labels: ["Token", "Price", "Protocols", "Best Collateral Factor"],
@@ -52,9 +52,9 @@ export default async function Tokens({ searchParams }) {
       protocolIconsObject: protocolIconsObject,
     },
 
-    filters: {
-      protocol: "tokens",
-    },
+    // filters: {
+    //   protocol: "tokens",
+    // },
 
     exports: true,
   };
