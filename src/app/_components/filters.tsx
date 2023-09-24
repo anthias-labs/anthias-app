@@ -5,7 +5,7 @@ import styles from "./filters.module.scss";
 import { ActionIcon, Select, Button, Popover, Checkbox } from "@mantine/core";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import fetchProtocolNumAddresses from "../_api/fetchProtocolNumAddresses";
+import fetchNumData from "../_api/fetchNumData";
 import fetchProtocols from "../_api/fetchProtocols";
 import fetchProtocolIcons from "../_api/fetchProtocolIcons";
 import blobToBase64 from "../_api/blobToBase64";
@@ -25,7 +25,7 @@ export default function FilterBar({
 
   const [filters, setFilters] = useState(defaultFilters);
   const [sortMode, setSortMode] = useState("Total Borrowed");
-  const [numAddresses, setNumAddresses] = useState(0);
+  const [numData, setNumData] = useState(0);
   const [protocols, setProtocols] = useState([]);
   const [selectedProtocols, setSelectedProtocols] = useState([]);
   const [search, setSearch] = useState("");
@@ -91,7 +91,7 @@ export default function FilterBar({
         tempFilters[field] = Number(values[0]);
       } else if (field === "paginate") {
         tempFilters[field] = values.map(Number);
-      } else if (field === "address") {
+      } else if (field === "search") {
         setSearch(values[0]);
         tempFilters[field] = values[0];
       }
@@ -109,12 +109,12 @@ export default function FilterBar({
       return;
     }
 
-    async function fetchNumAddresses() {
-      const count = (await fetchProtocolNumAddresses(protocol)) as number;
-      setNumAddresses(count);
+    async function fetchNumDataOnEffect() {
+      const count = (await fetchNumData(protocol)) as number;
+      setNumData(count);
     }
 
-    fetchNumAddresses();
+    fetchNumDataOnEffect();
   }, [searchParams]);
 
   function updateSortMode(mode) {
@@ -163,9 +163,9 @@ export default function FilterBar({
       tempFilters.paginate[0] += tempFilters.limit;
       tempFilters.paginate[1] += tempFilters.limit;
 
-      if (tempFilters.paginate[1] > numAddresses) {
-        tempFilters.paginate[0] = numAddresses - tempFilters.limit + 1;
-        tempFilters.paginate[1] = numAddresses;
+      if (tempFilters.paginate[1] > numData) {
+        tempFilters.paginate[0] = numData - tempFilters.limit + 1;
+        tempFilters.paginate[1] = numData;
       }
     }
 
@@ -178,9 +178,9 @@ export default function FilterBar({
     let currentParams = new URLSearchParams(searchParams.toString());
 
     if (name === "") {
-      currentParams.delete("address");
+      currentParams.delete("search");
     } else {
-      currentParams.set("address", name);
+      currentParams.set("search", name);
     }
 
     router.push(`${currentPath}?${currentParams.toString()}`, {
@@ -351,25 +351,27 @@ export default function FilterBar({
               </Popover>
             </div>
           )}
-          <div className={styles.filter}>
-            Sort:
-            <Select
-              classNames={{
-                input: styles.selectInput,
-                dropdown: styles.selectDropdown,
-                item: styles.selectItem,
-              }}
-              style={{ width: "9.5rem" }}
-              placeholder="Sort Mode"
-              data={["Total Supplied", "Total Borrowed"]}
-              value={sortMode}
-              maxDropdownHeight={200}
-              onChange={(value) => {
-                setSortMode(value);
-                updateSortMode(value);
-              }}
-            />
-          </div>
+          {protocol !== "tokens" && (
+            <div className={styles.filter}>
+              Sort:
+              <Select
+                classNames={{
+                  input: styles.selectInput,
+                  dropdown: styles.selectDropdown,
+                  item: styles.selectItem,
+                }}
+                style={{ width: "9.5rem" }}
+                placeholder="Sort Mode"
+                data={["Total Supplied", "Total Borrowed"]}
+                value={sortMode}
+                maxDropdownHeight={200}
+                onChange={(value) => {
+                  setSortMode(value);
+                  updateSortMode(value);
+                }}
+              />
+            </div>
+          )}
           <div className={styles.filter}>
             Amount:
             <Select
@@ -389,7 +391,7 @@ export default function FilterBar({
       </Popover>
       <div className={styles.paginate}>
         <div className={`${styles.filter} ${styles.pageLabel}`}>
-          {filters.paginate[0]} - {filters.paginate[1]} of {numAddresses}
+          {filters.paginate[0]} - {filters.paginate[1]} of {numData}
         </div>
         <div className={styles.filter}>
           <ActionIcon

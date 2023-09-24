@@ -17,7 +17,7 @@ export default async function fetchProtocolAddresses(protocol: string, params) {
 
     if (key === "sort") {
       positionQuery = positionQuery.order(value, { ascending: false });
-    } else if (key === "address") {
+    } else if (key === "search") {
       positionQuery = positionQuery.ilike("address", `%${value}%`);
     } else if (key === "paginate") {
       const values = value.split(",");

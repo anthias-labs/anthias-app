@@ -66,14 +66,43 @@ function updateRates(dataPoint: DataPoint, transformedDataEntry: DataPoint) {
 import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
-export default async function fetchTokensUnique(token?: string) {
+export default async function fetchTokensUnique(params, token?: string) {
   const supabase = createServerActionClient({ cookies });
 
-  let query = supabase.from("_tokens").select("*").limit(1000);
+  let query = supabase.from("_tokens").select("*");
 
   if (token) {
     query = query.eq("token_symbol", token);
   }
+
+  let keys = [];
+
+  // for (const [index, entry] of params.entries()) {
+  //   const [key, value] = entry;
+  //   keys.push(key);
+
+  //   if (key === "sort") {
+  //     // query = query.order(value, { ascending: false });
+  //   } else if (key === "search") {
+  //     query = query.ilike("token_symbol", `%${value}%`);
+  //   } else if (key === "paginate") {
+  //     const values = value.split(",");
+
+  //     const first = values[0] - 1;
+  //     const last = values[1] - 1;
+
+  //     if (last <= 999) {
+  //       query = query.range(first, last);
+  //     } else {
+  //       query = query.range(first, 1000);
+  //     }
+  //   }
+  // }
+
+  // // If params don't contain paginate, set to default
+  // if (!keys.includes("paginate")) {
+  //   query = query.range(0, 9);
+  // }
 
   let { data, error } = await query;
 

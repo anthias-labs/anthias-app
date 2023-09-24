@@ -4,8 +4,11 @@ import fetchProtocolIcons from "../_api/fetchProtocolIcons";
 import Table from "@/app/_components/table";
 import tokensToProtocolNames from "../_utils/tokensToProtocolNames";
 
-export default async function Tokens() {
-  const initialData = await fetchTokensUnique();
+export default async function Tokens({ searchParams }) {
+  const urlSearchParams = new URLSearchParams(searchParams);
+  const initialData = await fetchTokensUnique(urlSearchParams);
+
+  console.log("initialData", initialData);
 
   const protocolNames = tokensToProtocolNames(initialData);
   const protocolIcons = await fetchProtocolIcons(protocolNames, true);
@@ -17,6 +20,11 @@ export default async function Tokens() {
 
   const tableProps = {
     title: "Select a Token",
+
+    defaultFilters: {
+      limit: 10,
+      paginate: [1, 10],
+    },
 
     columns: {
       labels: ["Token", "Price", "Protocols", "Best Collateral Factor"],
@@ -43,6 +51,12 @@ export default async function Tokens() {
       args: [],
       protocolIconsObject: protocolIconsObject,
     },
+
+    filters: {
+      protocol: "tokens",
+    },
+
+    exports: true,
   };
 
   return <Table tableProps={tableProps} initialData={initialData} />;

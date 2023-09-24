@@ -223,7 +223,7 @@ export default function Login() {
             </svg>
             Log In With Google
           </div>
-          <div
+          {/* <div
             className={`${styles.alternative} ${styles.github}`}
             onClick={() => {
               handleProvider("github");
@@ -238,7 +238,7 @@ export default function Login() {
               />
             </svg>
             Log In With Github
-          </div>
+          </div> */}
         </div>
         <div className={styles.wrongPage}>
           Don{"'"}t have an account?{" "}
