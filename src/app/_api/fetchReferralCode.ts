@@ -79,6 +79,8 @@ export default async function fetchReferralCode(uid: string) {
         .sort((a, b) => b[1] - a[1])
         .map((entry) => entry[0]);
       retData.rank = sortedCodes.indexOf(retData.code) + 1; // +1 to get 1-based rank
+
+      if (retData.rank === 0) retData.rank = sortedCodes.length + 1; // If the code is not in the list, set rank to the last
     }
   }
 
