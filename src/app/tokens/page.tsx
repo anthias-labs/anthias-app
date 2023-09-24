@@ -56,7 +56,7 @@ export default async function Tokens({ searchParams }) {
     //   protocol: "tokens",
     // },
 
-    exports: true,
+    // exports: true,
   };
 
   return <Table tableProps={tableProps} initialData={initialData} />;
