@@ -9,11 +9,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   GoogleReCaptchaProvider,
   GoogleReCaptcha,
 } from "react-google-recaptcha-v3";
-import Link from "next/link";
 
 export default function SingUp() {
   const [errorText, setErrorText] = useState("");
@@ -305,7 +305,7 @@ export default function SingUp() {
               </svg>
               Sign Up With Google
             </div>
-            <div
+            {/* <div
               className={`${styles.alternative} ${styles.github}`}
               onClick={() => {
                 handleProvider("github");
@@ -325,7 +325,7 @@ export default function SingUp() {
                 />
               </svg>
               Sign Up With Github
-            </div>
+            </div> */}
           </div>
           <div className={styles.wrongPage}>
             Already have an account?{" "}

@@ -10,14 +10,15 @@ export default async function MarketsGraph({ params, searchParams }) {
   const urlSearchParams = new URLSearchParams(searchParams);
   const initialData = await fetchProtocolMarkets(protocol, urlSearchParams);
 
-  const token_symbols = initialData.map((market) => market.token_symbol);
-  const initialIcons = await fetchTokenIcons(token_symbols);
+  // const token_symbols = initialData.map((market) => market.token_symbol);
+  // const initialIcons = await fetchTokenIcons(token_symbols);
 
   return (
-    <TreeGraph
-      protocol={protocol}
-      initialData={initialData}
-      initialIcons={initialIcons}
-    />
+    <></>
+    // <TreeGraph
+    //   protocol={protocol}
+    //   initialData={initialData}
+    //   initialIcons={initialIcons}
+    // />
   );
 }

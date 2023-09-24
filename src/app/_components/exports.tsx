@@ -53,7 +53,13 @@ export default function Exports({
       const values = obj
         .map((row) =>
           Object.values(row)
-            .map((value) => `"${value}"`)
+            .map((value) => {
+              if (typeof value === "object") {
+                value = JSON.stringify(value);
+              }
+
+              return `"${value}"`;
+            })
             .join(",")
         )
         .join("\n");

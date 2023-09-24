@@ -9,6 +9,9 @@ export default async function PositionsTable({ params, searchParams }) {
   const protocol = params.chain;
   const title = protocolToTitle(protocol) + " Positions";
 
+  const urlSearchParams = new URLSearchParams(searchParams);
+  const initialData = await fetchProtocolAddresses(protocol, urlSearchParams);
+
   const tableProps = {
     title: title,
 
@@ -44,9 +47,6 @@ export default async function PositionsTable({ params, searchParams }) {
 
     exports: true,
   };
-
-  const urlSearchParams = new URLSearchParams(searchParams);
-  const initialData = await fetchProtocolAddresses(protocol, urlSearchParams);
 
   return <Table tableProps={tableProps} initialData={initialData} />;
 }
