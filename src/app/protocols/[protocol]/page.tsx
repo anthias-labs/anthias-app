@@ -35,6 +35,7 @@ export default async function Protocol({ params }) {
   const initialData = await fetchProtocol(name);
   const initialIcons = await fetchProtocolTokenIcons(initialData);
 
+
   if (initialData.length === 1 && tableProps.link) {
     redirect(`${tableProps.link.base}/${initialData[0][tableProps.link.key]}`);
   }

@@ -15,9 +15,6 @@ import fishImg from "@/assets/icons/fish.svg";
 import tableImg from "@/assets/icons/table.svg";
 import graphImg from "@/assets/icons/graph.svg";
 
-import fetchSession from "../_api/fetchSession";
-import fetchProtocolIcons from "../_api/fetchProtocolIcons";
-import fetchProtocolTokenIcons from "../_api/fetchProtocolTokenIcons";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 import { titleCase } from "../_utils/textHandling";
