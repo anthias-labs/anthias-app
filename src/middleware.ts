@@ -17,9 +17,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/mobile", req.url));
   }
 
-  if (!session.data.session) {
-    return NextResponse.redirect(new URL("/account/signup", req.url));
-  }
+  // if (!session.data.session) {
+  //   return NextResponse.redirect(new URL("/account/signup", req.url));
+  // }
 
   return res;
 }
