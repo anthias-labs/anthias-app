@@ -37,7 +37,7 @@ import {
 import Filters from "@/app/_components/filters";
 import Exports from "@/app/_components/exports";
 
-export default function BubbleGraph({ protocol, initialData }) {
+export default function BubbleGraph({ protocol, initialData, thisProtocol }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -119,7 +119,7 @@ export default function BubbleGraph({ protocol, initialData }) {
       if (i[0]) {
         const dataIndex = i[0].index;
         const address = dataSet[dataIndex].address;
-        window.open(`https://etherscan.io/address/${address}`, "_blank");
+        window.open(`${thisProtocol.link}${address}`, "_blank");
       }
     },
     onHover: (event, chartElement) => {

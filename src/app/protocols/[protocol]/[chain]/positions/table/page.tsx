@@ -2,6 +2,7 @@
 
 import Table from "@/app/_components/table";
 import fetchProtocolAddresses from "@/app/_api/fetchProtocolAddresses";
+import fetchProtocols from "@/app/_api/fetchProtocols";
 
 import { protocolToTitle } from "@/app/_utils/textHandling";
 
@@ -11,6 +12,9 @@ export default async function PositionsTable({ params, searchParams }) {
 
   const urlSearchParams = new URLSearchParams(searchParams);
   const initialData = await fetchProtocolAddresses(protocol, urlSearchParams);
+
+  const protocols = await fetchProtocols();
+  const thisProtocol = protocols.find((p) => p.protocol === params.chain);
 
   const tableProps = {
     title: title,
@@ -32,7 +36,7 @@ export default async function PositionsTable({ params, searchParams }) {
     },
 
     link: {
-      base: "https://etherscan.io/address",
+      base: thisProtocol.link,
       key: "address",
     },
 
