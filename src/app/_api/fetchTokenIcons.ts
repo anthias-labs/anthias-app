@@ -7,12 +7,19 @@ export default function fetchTokenIcons(tokens) {
   const supabase = createClientComponentClient();
 
   const promises = tokens.map(async (token) => {
+    let tokenSymbol = token.underlying_symbol;
+    if (tokenSymbol[0] === "c") {
+      tokenSymbol = tokenSymbol.slice(1);
+    }
+
     const { data, error } = await supabase.storage
       .from("token_icons")
-      .download(`${token.underlying_symbol}`);
+      .download(tokenSymbol);
 
     if (error) {
-      console.log(error);
+      console.log(tokenSymbol, error);
+
+      return null;
     }
 
     const base64Icon = await blobToBase64(data);

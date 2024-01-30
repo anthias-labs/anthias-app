@@ -7,7 +7,11 @@ import fetchProtocolsUnique from "@/app/_api/fetchProtocolsUnique";
 import fetchProtocolIcons from "@/app/_api/fetchProtocolIcons";
 import Table from "@/app/_components/table";
 
+import { redirect } from "next/navigation";
+
 export default async function MarketsPage({ params }) {
+  redirect(`/protocols/${params.protocol}/${params.chain}/markets/table`);
+
   const tableProps = {
     title: "Select a View",
 

@@ -82,11 +82,11 @@ export default function Navbar({ protocols }) {
                         value: "table",
                         icon: tableImg || defaultImg,
                       },
-                      graph: {
-                        label: "Graph",
-                        value: "graph",
-                        icon: graphImg || defaultImg,
-                      },
+                      // graph: {
+                      //   label: "Graph",
+                      //   value: "graph",
+                      //   icon: graphImg || defaultImg,
+                      // },
                     },
                   },
                 },
@@ -104,11 +104,11 @@ export default function Navbar({ protocols }) {
     //   value: "wallets",
     //   icon: walletsImg || defaultImg,
     // },
-    tokens: {
-      label: "Tokens",
-      value: "tokens",
-      icon: tokensImg,
-    },
+    // tokens: {
+    //   label: "Tokens",
+    //   value: "tokens",
+    //   icon: tokensImg,
+    // },
     account: {
       label: "Account",
       value: "account",
