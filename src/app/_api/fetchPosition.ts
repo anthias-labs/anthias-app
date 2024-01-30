@@ -3,7 +3,7 @@
 import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
-export default async function fetchAddress(address, protocols) {
+export default async function fetchPosition(address, protocols) {
   const supabase = createServerActionClient({ cookies });
   let retData = [];
 

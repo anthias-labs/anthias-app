@@ -7,7 +7,7 @@ import fetchProtocolIcons from "@/app/_api/fetchProtocolIcons";
 import fetchCoinGeckoHistoricalPrices from "@/app/_api/fetchCoinGeckoHistoricalPrices";
 import fetchCoinGeckoTokenIcon from "@/app/_api/fetchCoinGeckoTokenIcon";
 import blobToBase64 from "@/app/_api/blobToBase64";
-import fetchAddress from "@/app/_api/fetchAddress";
+import fetchAddress from "@/app/_api/fetchPosition";
 import { useEffect, useState } from "react";
 import {
   titleCase,

@@ -23,7 +23,11 @@ export default async function fetchProtocolMarkets(
   let transformedData: { [underlying_symbol: string]: TransformedDataEntry } =
     {};
 
-  let query = supabase.from(`${protocol}_balances`).select("*").limit(1500);
+  let query = supabase
+    .from(`${protocol}_balances`)
+    .select("*")
+    .order("updated_at", { ascending: false })
+    .limit(1000);
 
   let { data, error } = await query;
 

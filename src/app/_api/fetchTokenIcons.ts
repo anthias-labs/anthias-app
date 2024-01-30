@@ -2,15 +2,13 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import blobToBase64 from "./blobToBase64";
+import { getTokenSymbol } from "../_utils/textHandling";
 
-export default function fetchTokenIcons(tokens) {
+export default async function fetchTokenIcons(tokens) {
   const supabase = createClientComponentClient();
 
   const promises = tokens.map(async (token) => {
-    let tokenSymbol = token.underlying_symbol;
-    if (tokenSymbol[0] === "c") {
-      tokenSymbol = tokenSymbol.slice(1);
-    }
+    let tokenSymbol = getTokenSymbol(token);
 
     const { data, error } = await supabase.storage
       .from("token_icons")
@@ -18,13 +16,22 @@ export default function fetchTokenIcons(tokens) {
 
     if (error) {
       console.log(tokenSymbol, error);
-
-      return null;
+      return { tokenSymbol, icon: null };
     }
 
     const base64Icon = await blobToBase64(data);
-    return base64Icon;
+    return { tokenSymbol, icon: base64Icon };
   });
 
-  return Promise.all(promises);
+  const results = await Promise.all(promises);
+
+  const iconMap = {};
+
+  results.forEach(({ tokenSymbol, icon }) => {
+    if (icon) {
+      iconMap[tokenSymbol] = icon;
+    }
+  });
+
+  return iconMap;
 }

@@ -1,0 +1,158 @@
+.positionContainer {
+  $aqua: #1fcfcf;
+  $pink: #ee40bd;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+
+  .search {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 2.5rem;
+    background-color: rgba(31, 207, 207, 0.24);
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+
+    input {
+      height: 100%;
+      width: 100%;
+      background-color: transparent;
+      border: none;
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: white;
+        filter: brightness(0.75);
+      }
+    }
+
+    svg {
+      cursor: pointer;
+      height: 1.75rem;
+      fill: $aqua;
+      filter: brightness(0.85);
+      transition: filter 0.2s ease-in-out;
+
+      &:hover {
+        filter: brightness(1);
+      }
+    }
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    color: white;
+    font-weight: normal;
+
+    span {
+      color: $aqua;
+    }
+  }
+
+  .protocol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+
+    .pieCharts {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 300px;
+
+      .chart {
+        flex: 1.5;
+      }
+    }
+
+    .positionInfo {
+      // background-color: #181818;
+      background-color: rgba(31, 207, 207, 0.24);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .protocol {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+        justify-content: center;
+        font-size: 1.15rem;
+      }
+
+      .healthFactor {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: center;
+
+        span {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          padding: 0.25rem 0.5rem;
+          border-radius: 0.85rem;
+          font-size: 0.85rem;
+        }
+
+        &.safe {
+          span {
+            background-color: #1fc73b;
+          }
+        }
+
+        &.risky {
+          span {
+            background-color: #ffa323;
+          }
+        }
+
+        &.unsafe {
+          span {
+            background-color: #ff2d2d;
+          }
+        }
+      }
+    }
+
+    .label {
+      &.title {
+        transform: translateY(-30px);
+      }
+    }
+  }
+}
+
+.customTooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  background-color: #181818;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 1.15rem;
+  }
+}

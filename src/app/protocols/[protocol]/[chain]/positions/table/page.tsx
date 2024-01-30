@@ -15,6 +15,7 @@ export default async function PositionsTable({ params, searchParams }) {
 
   const protocols = await fetchProtocols();
   const thisProtocol = protocols.find((p) => p.protocol === params.chain);
+  console.log("thisProtocol", thisProtocol.name);
 
   const tableProps = {
     title: title,

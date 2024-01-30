@@ -167,9 +167,14 @@ export default function Table({
                       className={styles.motion}
                     >
                       <Link
-                        href={`${tableProps.link.base}/${
-                          data[tableProps.link.key]
-                        }`}
+                        href={
+                          tableProps.link.base ===
+                          "https://app.anthias.xyz/position"
+                            ? `/position?address=${data[tableProps.link.key]}`
+                            : `${tableProps.link.base}/${
+                                data[tableProps.link.key]
+                              }`
+                        }
                         className={styles.tr}
                         style={{ textDecoration: "none" }}
                       >

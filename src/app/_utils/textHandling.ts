@@ -42,13 +42,23 @@ export function separateSnakeCase(str: string) {
   return str.split("_");
 }
 
-export function getHealthFactorClass(healthFactor: number, styles) {
+export function getHealthFactorClass(
+  healthFactor: number,
+  styles,
+  isTable = true
+) {
   if (healthFactor === -1 || healthFactor > 1.3) {
-    return `${styles.td} ${styles.healthFactor} ${styles.safe}`;
+    return isTable
+      ? `${styles.td} ${styles.healthFactor} ${styles.safe}`
+      : `${styles.healthFactor} ${styles.safe}`;
   } else if (healthFactor > 1.1 && healthFactor <= 1.3) {
-    return `${styles.td} ${styles.healthFactor} ${styles.risky}`;
+    return isTable
+      ? `${styles.td} ${styles.healthFactor} ${styles.risky}`
+      : `${styles.healthFactor} ${styles.risky}`;
   } else {
-    return `${styles.td} ${styles.healthFactor} ${styles.unsafe}`;
+    return isTable
+      ? `${styles.td} ${styles.healthFactor} ${styles.unsafe}`
+      : `${styles.healthFactor} ${styles.unsafe}`;
   }
 }
 
@@ -64,6 +74,8 @@ export function getTokenSymbol(symbol: string) {
       // Get uppercase letters
       return str.match(/[A-Z]/g).join("");
     }
+  } else if (symbol[0] === "c") {
+    return symbol.slice(1);
   } else {
     return symbol;
   }

@@ -109,6 +109,12 @@ export default function Navbar({ protocols }) {
     //   value: "tokens",
     //   icon: tokensImg,
     // },
+    position: {
+      label: "Position",
+      value: "position",
+      icon: walletsImg || defaultImg,
+      placeholder: "Address",
+    },
     account: {
       label: "Account",
       value: "account",

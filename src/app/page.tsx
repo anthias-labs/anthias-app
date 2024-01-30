@@ -30,16 +30,20 @@ export default async function HomePage() {
           mode: "protocols",
         },
         {
-          name: "Tokens",
-          mode: "tokens",
+          name: "Position",
+          mode: "position",
         },
+        // {
+        //   name: "Tokens",
+        //   mode: "tokens",
+        // },
         {
           name: "Account",
           mode: "account",
         },
       ],
 
-      icons: [protocolsImg, tokensImg, fishImg],
+      icons: [protocolsImg, walletsImg, fishImg],
     },
 
     dataFetch: {
