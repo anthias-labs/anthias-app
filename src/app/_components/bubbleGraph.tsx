@@ -373,10 +373,10 @@ export default function BubbleGraph({ protocol, initialData, thisProtocol }) {
 
   function getTooltipBody(tooltipItem) {
     let totalBorrowed = tooltipItem.raw.y.toFixed(2);
-    totalBorrowed = "$" + moneyToRoundedString(totalBorrowed);
+    totalBorrowed = "$" + moneyToRoundedString(Number(totalBorrowed));
 
     let totalSupplied = tooltipItem.raw.supplied.toFixed(2);
-    totalSupplied = "$" + moneyToRoundedString(totalSupplied);
+    totalSupplied = "$" + moneyToRoundedString(Number(totalSupplied));
 
     const healthFactor = roundedHealthFactor(tooltipItem.raw.x);
 

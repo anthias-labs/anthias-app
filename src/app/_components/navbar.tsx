@@ -128,10 +128,9 @@ export default function Navbar({ protocols }) {
     setSelectedPath(newSelectedPath);
   }, [pathname]);
 
-  supabase.auth.onAuthStateChange((event, session) => {
-    console.log(event, session);
-    // setSession(session);
-  });
+  // supabase.auth.onAuthStateChange((event, session) => {
+  //   setSession(session);
+  // });
 
   function SelectItem({ value, label, icon, index, ...others }) {
     let hrefArr = selectedPath.slice(0, index + 1);
