@@ -6,8 +6,8 @@ export async function middleware(req: NextRequest) {
   const headersList = req.headers;
   const userAgent = headersList.get("user-agent");
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
-  const session = await supabase.auth.getSession();
+  // const supabase = createMiddlewareClient({ req, res });
+  // const session = await supabase.auth.getSession();
 
   const isMobile = userAgent!.match(
     /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i
