@@ -42,7 +42,6 @@ export default function Position({ searchParams, defaultPosition }) {
 
   useEffect(() => {
     setAddress(searchParams.address || "");
-    console.log("defaultPosition", defaultPosition);
 
     if (defaultPosition) {
       setPosition(defaultPosition);
@@ -176,7 +175,6 @@ export default function Position({ searchParams, defaultPosition }) {
       )}
       {position.length > 0 &&
         position.map((protocol, index) => {
-          // console.log("protocol", protocol);
           return (
             <div className={styles.protocol} key={index}>
               <div className={styles.pieCharts}>
@@ -209,8 +207,8 @@ export default function Position({ searchParams, defaultPosition }) {
                         value={"Supplied"}
                         style={{
                           fontSize: "1rem",
-                          stroke: "grey",
-                          fill: "grey",
+                          stroke: "white",
+                          fill: "white",
                           fontWeight: "100",
                         }}
                         className={`${styles.label} ${styles.title}`}
@@ -314,8 +312,8 @@ export default function Position({ searchParams, defaultPosition }) {
                         value={"Borrowed"}
                         style={{
                           fontSize: "1rem",
-                          stroke: "grey",
-                          fill: "grey",
+                          stroke: "white",
+                          fill: "white",
                           fontWeight: "100",
                         }}
                         className={`${styles.label} ${styles.title}`}
