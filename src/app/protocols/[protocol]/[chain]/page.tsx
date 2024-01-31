@@ -5,8 +5,11 @@ import marketImg from "@/assets/icons/token.svg";
 import fetchProtocolsUnique from "@/app/_api/fetchProtocolsUnique";
 import fetchProtocolIcons from "@/app/_api/fetchProtocolIcons";
 import Table from "@/app/_components/table";
+import { redirect } from "next/navigation";
 
 export default async function ProtocolChainPage({ params }) {
+  redirect(`/protocols/${params.protocol}/${params.chain}/positions`);
+
   const tableProps = {
     title: "Select a Mode",
 
@@ -26,10 +29,10 @@ export default async function ProtocolChainPage({ params }) {
           mode: "positions",
           name: "Positions",
         },
-        {
-          mode: "markets",
-          name: "Markets",
-        },
+        // {
+        //   mode: "markets",
+        //   name: "Markets",
+        // },
       ],
 
       icons: [walletImg, marketImg],

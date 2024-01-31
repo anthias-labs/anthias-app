@@ -53,9 +53,9 @@ export default async function fetchPosition(address, protocols) {
             position["position"]["lent"].push(token);
           }
         }
-      }
 
-      retData.push(position);
+        retData.push(position);
+      }
     }
   }
 
