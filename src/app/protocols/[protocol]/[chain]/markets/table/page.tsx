@@ -26,7 +26,7 @@ export default async function MarketsTable({ params, searchParams }) {
 
     link: {
       base: "https://etherscan.io/token",
-      key: "underlying_symbol",
+      key: "token_address",
     },
 
     dataFetch: {

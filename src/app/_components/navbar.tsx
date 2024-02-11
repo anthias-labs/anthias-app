@@ -70,25 +70,25 @@ export default function Navbar({ protocols }) {
                       },
                     },
                   },
-                  // markets: {
-                  //   label: "Markets",
-                  //   value: "markets",
-                  //   icon: tokensImg || defaultImg,
-                  //   placeholder: "View",
-                  //   // default: "table",
-                  //   subPaths: {
-                  //     table: {
-                  //       label: "Table",
-                  //       value: "table",
-                  //       icon: tableImg || defaultImg,
-                  //     },
-                  //     // graph: {
-                  //     //   label: "Graph",
-                  //     //   value: "graph",
-                  //     //   icon: graphImg || defaultImg,
-                  //     // },
-                  //   },
-                  // },
+                  markets: {
+                    label: "Markets",
+                    value: "markets",
+                    icon: tokensImg || defaultImg,
+                    placeholder: "View",
+                    // default: "table",
+                    subPaths: {
+                      table: {
+                        label: "Table",
+                        value: "table",
+                        icon: tableImg || defaultImg,
+                      },
+                      // graph: {
+                      //   label: "Graph",
+                      //   value: "graph",
+                      //   icon: graphImg || defaultImg,
+                      // },
+                    },
+                  },
                 },
               };
             }

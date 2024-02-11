@@ -7,12 +7,14 @@ interface DataPoint {
   symbol: string;
   type: "Supplied" | "Borrowed";
   balance: number;
+  token_address: string;
 }
 
 interface TransformedDataEntry {
   underlying_symbol: string;
   total_supplied: number;
   total_borrowed: number;
+  token_address: string;
 }
 
 export default async function fetchProtocolMarkets(
@@ -36,6 +38,8 @@ export default async function fetchProtocolMarkets(
     return null;
   }
 
+  console.log(data);
+
   if (data) {
     data.forEach((dataPoint: DataPoint) => {
       if (!transformedData[dataPoint.symbol]) {
@@ -43,6 +47,7 @@ export default async function fetchProtocolMarkets(
           underlying_symbol: dataPoint.symbol,
           total_supplied: 0,
           total_borrowed: 0,
+          token_address: dataPoint.token_address,
         };
       }
 
@@ -59,6 +64,7 @@ export default async function fetchProtocolMarkets(
         name: item.underlying_symbol,
         total_supplied: item.total_supplied,
         total_borrowed: item.total_borrowed,
+        token_address: item.token_address,
       };
     });
   }

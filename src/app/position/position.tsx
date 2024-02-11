@@ -60,7 +60,7 @@ export default function Position({ searchParams, defaultPosition }) {
         ...new Set(suppliedTokens.flat().concat(borrowedTokens.flat())),
       ];
 
-      fetchTokenIcons(tokenArray).then((icons) => {
+      fetchTokenIcons(tokenArray, false, false).then((icons) => {
         setTokenIcons(icons);
       });
     }
