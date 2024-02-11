@@ -33,12 +33,12 @@ export default async function fetchProtocolMarkets(
 
   let { data, error } = await query;
 
+  // let { data, error } = await supabase.rpc("compound_v2_ethereum_markets");
+
   if (error) {
     console.log(error);
     return null;
   }
-
-  console.log(data);
 
   if (data) {
     data.forEach((dataPoint: DataPoint) => {

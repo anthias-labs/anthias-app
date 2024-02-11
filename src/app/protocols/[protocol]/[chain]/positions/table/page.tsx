@@ -38,6 +38,7 @@ export default async function PositionsTable({ params, searchParams }) {
     link: {
       base: thisProtocol.link,
       key: "address",
+      newTab: true,
     },
 
     dataFetch: {

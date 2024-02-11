@@ -119,7 +119,7 @@ export default function BubbleGraph({ protocol, initialData, thisProtocol }) {
       if (i[0]) {
         const dataIndex = i[0].index;
         const address = dataSet[dataIndex].address;
-        window.open(`${thisProtocol.link}${address}`, "_blank");
+        window.open(`${thisProtocol.link}/?address=${address}`, "_blank");
       }
     },
     onHover: (event, chartElement) => {

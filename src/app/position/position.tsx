@@ -23,7 +23,11 @@ import {
   Tooltip as PieTooltip,
 } from "recharts";
 
-export default function Position({ searchParams, defaultPosition }) {
+export default function Position({
+  searchParams,
+  defaultPosition,
+  tokenPrices,
+}) {
   const [position, setPosition] = useState(defaultPosition || []);
   const [address, setAddress] = useState("");
   const [tokenIcons, setTokenIcons] = useState({});
@@ -42,8 +46,49 @@ export default function Position({ searchParams, defaultPosition }) {
     setAddress(searchParams.address || "");
 
     if (defaultPosition) {
-      setPosition(defaultPosition);
+      let newPosition = defaultPosition;
+      // Getting prices
+      newPosition = newPosition.map((protocol) => {
+        const name = protocol.protocol.name;
+        const chain = protocol.protocol.chain;
+        const version = protocol.protocol.version;
 
+        protocol.position.supplied = protocol.position.supplied.map((token) => {
+          const tokenPrice = tokenPrices.find(
+            (price) =>
+              price.token_symbol === token.symbol &&
+              price.protocol === name &&
+              price.chain === chain &&
+              price.version === version
+          ).price;
+
+          token.price = tokenPrice;
+          token.value = token.balance * tokenPrice;
+
+          return token;
+        });
+
+        protocol.position.borrowed = protocol.position.borrowed.map((token) => {
+          const tokenPrice = tokenPrices.find(
+            (price) =>
+              price.token_symbol === token.symbol &&
+              price.protocol === name &&
+              price.chain === chain &&
+              price.version === version
+          ).price;
+
+          token.price = tokenPrice;
+          token.value = token.balance * tokenPrice;
+
+          return token;
+        });
+
+        return protocol;
+      });
+
+      setPosition(newPosition);
+
+      // Getting token icons
       const suppliedTokens = defaultPosition.map((protocol) => {
         return protocol.position.supplied.map((token) => {
           return token.symbol;
@@ -86,6 +131,10 @@ export default function Position({ searchParams, defaultPosition }) {
     }
     const payload = props.payload[0].payload.payload;
 
+    const value = payload.value.toLocaleString("en-US", {
+      maximumFractionDigits: 2,
+    });
+
     const balance = payload.balance.toLocaleString("en-US", {
       maximumFractionDigits: 2,
     });
@@ -103,11 +152,11 @@ export default function Position({ searchParams, defaultPosition }) {
           />
           {tokenSymbol}
         </div>
-        <div className={styles.ratio}></div>
-        <div className={styles.value}></div>
-        <div className={styles.balance}>
+        <span className={styles.ratio}></span>
+        <span className={styles.balance}>
           {balance} {tokenSymbol}
-        </div>
+        </span>
+        <span className={styles.value}>${value}</span>
       </div>
     );
   }

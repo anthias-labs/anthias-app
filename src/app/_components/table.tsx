@@ -175,6 +175,7 @@ export default function Table({
                                 data[tableProps.link.key]
                               }`
                         }
+                        target={tableProps.link.newTab ? "_blank" : ""}
                         className={styles.tr}
                         style={{ textDecoration: "none" }}
                       >
