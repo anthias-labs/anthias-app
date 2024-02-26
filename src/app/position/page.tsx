@@ -13,12 +13,17 @@ export default async function PositionPage({ searchParams }) {
     (protocol) => protocol.name === "compound"
   );
 
+  const position = await fetchPosition(searchParams.address, trimmedProtocols);
+
+  const positionProtocols = trimmedProtocols.filter((protocol) =>
+    position.some((p) => p.protocol.protocol === protocol.protocol)
+  );
+
   const tokenPrices = await fetchTokenPrices();
   const covarianceMatrices = await fetchCovarianceMatrices(
-    trimmedProtocols,
-    30
+    positionProtocols,
+    180
   );
-  const position = await fetchPosition(searchParams.address, trimmedProtocols);
 
   return (
     <div>
@@ -26,6 +31,7 @@ export default async function PositionPage({ searchParams }) {
         searchParams={searchParams}
         defaultPosition={position}
         tokenPrices={tokenPrices}
+        covarianceMatrices={covarianceMatrices}
       />
     </div>
   );

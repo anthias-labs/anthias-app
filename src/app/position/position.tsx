@@ -27,6 +27,7 @@ export default function Position({
   searchParams,
   defaultPosition,
   tokenPrices,
+  covarianceMatrices,
 }) {
   const [position, setPosition] = useState(defaultPosition || []);
   const [address, setAddress] = useState("");
@@ -82,6 +83,17 @@ export default function Position({
 
           return token;
         });
+
+        return protocol;
+      });
+
+      newPosition = newPosition.map((protocol) => {
+        analyzePosition(
+          covarianceMatrices[
+            `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
+          ],
+          protocol
+        );
 
         return protocol;
       });
@@ -159,6 +171,73 @@ export default function Position({
         <span className={styles.value}>${value}</span>
       </div>
     );
+  }
+
+  function analyzePosition(covarianceMatrix, protocol) {
+    let positionVector = {};
+    const total = protocol.total_supplied + protocol.total_borrowed;
+    const difference = protocol.total_supplied - protocol.total_borrowed;
+    let positionVariance = 0;
+    let positionMeanReturn = 0;
+    const numDays = 180;
+
+    protocol.position.supplied.forEach((token) => {
+      positionVector[`${getTokenSymbol(token.symbol)}_supplied`] =
+        token.value / total;
+    });
+
+    protocol.position.borrowed.forEach((token) => {
+      positionVector[`${getTokenSymbol(token.symbol)}_borrowed`] =
+        token.value / total;
+    });
+
+    const tokens = Object.keys(positionVector);
+
+    tokens.forEach((tokenA) => {
+      let tokenAIndex = 2 * covarianceMatrix.indexToToken[tokenA.split("_")[0]];
+      if (tokenA.includes("borrowed")) {
+        tokenAIndex += 1;
+      }
+
+      positionMeanReturn +=
+        positionVector[tokenA] * covarianceMatrix.meanReturns[tokenAIndex];
+
+      tokens.forEach((tokenB) => {
+        let tokenBIndex =
+          2 * covarianceMatrix.indexToToken[tokenB.split("_")[0]];
+        if (tokenB.includes("borrowed")) {
+          tokenBIndex += 1;
+        }
+
+        positionVariance +=
+          positionVector[tokenA] *
+          positionVector[tokenB] *
+          covarianceMatrix.covariance[tokenAIndex][tokenBIndex];
+      });
+    });
+
+    const zScore =
+      (Math.log((total - difference) / total) -
+        (positionMeanReturn - positionVariance / 2) * numDays) /
+      Math.sqrt(positionVariance * numDays);
+
+    const probability = cdfNormal(zScore, 0, 1);
+
+    console.log("ZSCORE", zScore);
+    console.log("LIQUIDITY RISK", probability);
+  }
+
+  function cdfNormal(x, mean, std) {
+    let Z = (x - mean) / std;
+    let t = 1 / (1 + 0.2315419 * Math.abs(Z));
+    let d = 0.3989423 * Math.exp((-Z * Z) / 2);
+    let prob =
+      d *
+      t *
+      (0.3193815 +
+        t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+    if (Z > 0) prob = 1 - prob;
+    return prob;
   }
 
   return (

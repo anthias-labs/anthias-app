@@ -23,7 +23,7 @@ export default async function fetchCovarianceMatrices(
         .single();
 
       if (!error) {
-        matrices[`${protocol.name}-${protocol.version}-${protocol.chain}`] =
+        matrices[`${protocol.name}-v${protocol.version}-${protocol.chain}`] =
           data.matrix;
       } else {
         console.error(error);
