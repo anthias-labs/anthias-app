@@ -74,8 +74,12 @@ export function getTokenSymbol(symbol: string) {
       // Get uppercase letters
       return str.match(/[A-Z]/g).join("");
     }
+  } else if (symbol === "WBTC2" || symbol === "cWBTC2") {
+    return "WBTC";
   } else if (symbol[0] === "c") {
     return symbol.slice(1);
+  } else if (symbol === "WBTC2") {
+    return "WBTC";
   } else {
     return symbol;
   }

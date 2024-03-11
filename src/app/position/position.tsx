@@ -32,6 +32,10 @@ export default function Position({
   const [position, setPosition] = useState(defaultPosition || []);
   const [address, setAddress] = useState("");
   const [tokenIcons, setTokenIcons] = useState({});
+  const [lookBack, setLookBack] = useState(180); // Default 180 days
+  const [lookForward, setLookForward] = useState(30); // Default 30 days
+  const [alpha, setAlpha] = useState(0.05); // Default 5%
+  const [riskProfile, setRiskProfile] = useState({});
   const router = useRouter();
 
   const pieColors = [
@@ -46,8 +50,32 @@ export default function Position({
   useEffect(() => {
     setAddress(searchParams.address || "");
 
+    const lookForward = searchParams.lookForward || 30;
+    setLookForward(lookForward);
+    const lookBack = searchParams.lookBack || 180;
+    setLookBack(lookBack);
+    const alpha = searchParams.alpha || 0.05;
+    setAlpha(alpha);
+
     if (defaultPosition) {
       let newPosition = defaultPosition;
+
+      const suppliedTokens = newPosition.map((protocol) => {
+        return protocol.position.supplied.map((token) => {
+          return token.symbol;
+        });
+      });
+
+      const borrowedTokens = newPosition.map((protocol) => {
+        return protocol.position.borrowed.map((token) => {
+          return token.symbol;
+        });
+      });
+
+      const tokenArray = [
+        ...new Set(suppliedTokens.flat().concat(borrowedTokens.flat())),
+      ];
+
       // Getting prices
       newPosition = newPosition.map((protocol) => {
         const name = protocol.protocol.name;
@@ -84,39 +112,33 @@ export default function Position({
           return token;
         });
 
-        return protocol;
-      });
-
-      newPosition = newPosition.map((protocol) => {
-        analyzePosition(
-          covarianceMatrices[
-            `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
-          ],
-          protocol
-        );
+        protocol.token_array = tokenArray;
 
         return protocol;
       });
-
       setPosition(newPosition);
 
+      const riskProfile = newPosition
+        .map((protocol) => {
+          const protocolRiskProfile = analyzePosition(
+            covarianceMatrices[
+              `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
+            ],
+            protocol,
+            lookForward
+          );
+
+          return {
+            [`${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`]:
+              protocolRiskProfile,
+          };
+        })
+        .reduce((acc, cur) => {
+          return { ...acc, ...cur };
+        });
+      setRiskProfile(riskProfile);
+
       // Getting token icons
-      const suppliedTokens = defaultPosition.map((protocol) => {
-        return protocol.position.supplied.map((token) => {
-          return token.symbol;
-        });
-      });
-
-      const borrowedTokens = defaultPosition.map((protocol) => {
-        return protocol.position.borrowed.map((token) => {
-          return token.symbol;
-        });
-      });
-
-      const tokenArray = [
-        ...new Set(suppliedTokens.flat().concat(borrowedTokens.flat())),
-      ];
-
       fetchTokenIcons(tokenArray, false, false).then((icons) => {
         setTokenIcons(icons);
       });
@@ -151,7 +173,7 @@ export default function Position({
       maximumFractionDigits: 2,
     });
 
-    let tokenSymbol = getTokenSymbol(payload.symbol);
+    const tokenSymbol = getTokenSymbol(payload.symbol);
 
     return (
       <div className={styles.customTooltip}>
@@ -173,13 +195,49 @@ export default function Position({
     );
   }
 
-  function analyzePosition(covarianceMatrix, protocol) {
+  function getTokensWithHighCorrelation(tokenA, protocol, covarianceMatrix) {
+    // console.log("correlation protocol", protocol);
+    // console.log("correlation token", tokenA);
+    // console.log("covariance matrix", covarianceMatrix);
+
+    if (!protocol.token_array) {
+      return ["NA"];
+    }
+
+    let highCorrelationTokens = [];
+
+    const tokenAIndex =
+      2 * covarianceMatrix.indexToToken[getTokenSymbol(tokenA.symbol)];
+
+    protocol.token_array.forEach((tokenB) => {
+      console.log("tokenB", tokenB);
+      if (tokenB === tokenA.symbol) {
+        return;
+      }
+
+      const tokenBIndex =
+        2 * covarianceMatrix.indexToToken[getTokenSymbol(tokenB)];
+
+      const correlation =
+        covarianceMatrix.correlation[tokenAIndex][tokenBIndex];
+
+      // console.log(tokenA.symbol, tokenAIndex, tokenB, tokenBIndex, correlation);
+
+      // If absolute value of correlation is greater than 0.75
+      if (Math.abs(correlation) > 0.75) {
+        highCorrelationTokens.push(getTokenSymbol(tokenB));
+      }
+    });
+
+    return highCorrelationTokens.length === 0 ? ["NA"] : highCorrelationTokens;
+  }
+
+  function analyzePosition(covarianceMatrix, protocol, lookForward) {
     let positionVector = {};
     const total = protocol.total_supplied + protocol.total_borrowed;
     const difference = protocol.total_supplied - protocol.total_borrowed;
     let positionVariance = 0;
     let positionMeanReturn = 0;
-    const numDays = 180;
 
     protocol.position.supplied.forEach((token) => {
       positionVector[`${getTokenSymbol(token.symbol)}_supplied`] =
@@ -194,7 +252,9 @@ export default function Position({
     const tokens = Object.keys(positionVector);
 
     tokens.forEach((tokenA) => {
-      let tokenAIndex = 2 * covarianceMatrix.indexToToken[tokenA.split("_")[0]];
+      tokenA = getTokenSymbol(tokenA);
+      let tokenAIndex =
+        2 * covarianceMatrix.indexToToken[getTokenSymbol(tokenA.split("_")[0])];
       if (tokenA.includes("borrowed")) {
         tokenAIndex += 1;
       }
@@ -204,7 +264,8 @@ export default function Position({
 
       tokens.forEach((tokenB) => {
         let tokenBIndex =
-          2 * covarianceMatrix.indexToToken[tokenB.split("_")[0]];
+          2 *
+          covarianceMatrix.indexToToken[getTokenSymbol(tokenB.split("_")[0])];
         if (tokenB.includes("borrowed")) {
           tokenBIndex += 1;
         }
@@ -216,15 +277,27 @@ export default function Position({
       });
     });
 
-    const zScore =
-      (Math.log((total - difference) / total) -
-        (positionMeanReturn - positionVariance / 2) * numDays) /
-      Math.sqrt(positionVariance * numDays);
+    const zScore = getZScore(
+      total,
+      difference,
+      positionVariance,
+      positionMeanReturn,
+      lookForward
+    );
 
     const probability = cdfNormal(zScore, 0, 1);
 
-    console.log("ZSCORE", zScore);
-    console.log("LIQUIDITY RISK", probability);
+    return {
+      probability: probability,
+    };
+  }
+
+  function getZScore(total, difference, variance, meanReturn, lookForward) {
+    return (
+      (Math.log((total - difference) / total) -
+        (meanReturn - variance / 2) * lookForward) /
+      Math.sqrt(variance * lookForward)
+    );
   }
 
   function cdfNormal(x, mean, std) {
@@ -301,6 +374,12 @@ export default function Position({
       )}
       {position.length > 0 &&
         position.map((protocol, index) => {
+          console.log("mapping protocol", protocol);
+          const covarianceMatrix =
+            covarianceMatrices[
+              `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
+            ];
+
           return (
             <div className={styles.protocol} key={index}>
               <div className={styles.pieCharts}>
@@ -405,7 +484,16 @@ export default function Position({
                       false
                     )}
                   >
-                    <span>{roundedHealthFactor(protocol.health_factor)}</span>
+                    <span>
+                      {Number(roundedHealthFactor(protocol.health_factor)) ===
+                      -1 ? (
+                        <svg viewBox="0 0 24 24">
+                          <path d="M18.6 6.62c-1.44 0-2.8.56-3.77 1.53L12 10.66 10.48 12h.01L7.8 14.39c-.64.64-1.49.99-2.4.99-1.87 0-3.39-1.51-3.39-3.38S3.53 8.62 5.4 8.62c.91 0 1.76.35 2.44 1.03l1.13 1 1.51-1.34L9.22 8.2C8.2 7.18 6.84 6.62 5.4 6.62 2.42 6.62 0 9.04 0 12s2.42 5.38 5.4 5.38c1.44 0 2.8-.56 3.77-1.53l2.83-2.5.01.01L13.52 12h-.01l2.69-2.39c.64-.64 1.49-.99 2.4-.99 1.87 0 3.39 1.51 3.39 3.38s-1.52 3.38-3.39 3.38c-.9 0-1.76-.35-2.44-1.03l-1.14-1.01-1.51 1.34 1.27 1.12c1.02 1.01 2.37 1.57 3.82 1.57 2.98 0 5.4-2.41 5.4-5.38s-2.42-5.37-5.4-5.37z"></path>
+                        </svg>
+                      ) : (
+                        roundedHealthFactor(protocol.health_factor)
+                      )}
+                    </span>
                     {" Health Factor"}
                   </div>
                 </div>
@@ -481,6 +569,140 @@ export default function Position({
                     />
                   </PieChart>
                 </ResponsiveContainer>
+              </div>
+              <div className={styles.correlationTable}>
+                <div className={styles.title}>Correlation Table</div>
+                <div className={styles.table}>
+                  <div className={`${styles.row} ${styles.titleRow}`}>
+                    <div className={styles.col}>
+                      <span>Token Supplied</span>
+                    </div>
+                    <div className={styles.col}>
+                      <span>Dollar Amount</span>
+                    </div>
+                    <div className={styles.col}>
+                      <span>Position Ratio</span>
+                    </div>
+                    <div className={styles.col}>
+                      <span>High Correlation With</span>
+                    </div>
+                    <div className={styles.col}>
+                      <span>Liquidation Fee</span>
+                    </div>
+                  </div>
+                  {protocol.position.supplied.map((token, index) => {
+                    console.log("supplied token", token);
+                    const tokenSymbol = getTokenSymbol(token.symbol);
+
+                    const value = token.value
+                      ? token.value.toLocaleString("en-US", {
+                          maximumFractionDigits: 2,
+                        })
+                      : 0;
+
+                    const ratio = token.value
+                      ? (
+                          (token.value * 100) /
+                          protocol.total_supplied
+                        ).toLocaleString("en-US", {
+                          maximumFractionDigits: 2,
+                        })
+                      : 0;
+
+                    return (
+                      <div className={styles.row} key={index}>
+                        <div className={styles.col}>
+                          <Image
+                            src={
+                              tokenIcons[tokenSymbol]
+                                ? tokenIcons[tokenSymbol]
+                                : defaultImg
+                            }
+                            width={20}
+                            height={20}
+                            alt={tokenSymbol}
+                          />
+                          {tokenSymbol}
+                        </div>
+                        <div className={styles.col}>${value}</div>
+                        <div className={styles.col}>{ratio}%</div>
+                        <div className={styles.col}>
+                          {getTokensWithHighCorrelation(
+                            token,
+                            protocol,
+                            covarianceMatrix
+                          ).join(", ")}
+                        </div>
+                        <div className={styles.col}></div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {protocol.position.borrowed.length > 0 && (
+                  <div className={styles.table}>
+                    <div className={`${styles.row} ${styles.titleRow}`}>
+                      <div className={styles.col}>
+                        <span>Token Borrowed</span>
+                      </div>
+                      <div className={styles.col}>
+                        <span>Dollar Amount</span>
+                      </div>
+                      <div className={styles.col}>
+                        <span>Position Ratio</span>
+                      </div>
+                      <div className={styles.col}>
+                        <span>High Correlation With</span>
+                      </div>
+                      <div className={styles.col}></div>
+                    </div>
+                    {protocol.position.borrowed.map((token, index) => {
+                      const tokenSymbol = getTokenSymbol(token.symbol);
+
+                      const value = token.value
+                        ? token.value.toLocaleString("en-US", {
+                            maximumFractionDigits: 2,
+                          })
+                        : 0;
+
+                      const ratio = token.value
+                        ? (
+                            (token.value * 100) /
+                            protocol.total_borrowed
+                          ).toLocaleString("en-US", {
+                            maximumFractionDigits: 2,
+                          })
+                        : 0;
+
+                      return (
+                        <div className={styles.row} key={index}>
+                          <div className={styles.col}>
+                            <Image
+                              src={
+                                tokenIcons[tokenSymbol]
+                                  ? tokenIcons[tokenSymbol]
+                                  : defaultImg
+                              }
+                              width={20}
+                              height={20}
+                              alt={tokenSymbol}
+                            />
+                            {tokenSymbol}
+                          </div>
+                          <div className={styles.col}>${value}</div>
+                          <div className={styles.col}>{ratio}%</div>
+                          <div className={styles.col}>
+                            {getTokensWithHighCorrelation(
+                              token,
+                              protocol,
+                              covarianceMatrix
+                            ).join(", ")}
+                          </div>
+                          <div className={styles.col}></div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           );

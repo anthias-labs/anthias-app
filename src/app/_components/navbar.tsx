@@ -324,7 +324,7 @@ export default function Navbar({ protocols }) {
         )}
       </div>
 
-      <div className={styles.section}>
+      {/* <div className={styles.section}>
         {session ? (
           <Link
             href="/account"
@@ -344,7 +344,7 @@ export default function Navbar({ protocols }) {
             Log In
           </Link>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
