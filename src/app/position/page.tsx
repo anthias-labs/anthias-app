@@ -15,6 +15,8 @@ export default async function PositionPage({ searchParams }) {
 
   const position = await fetchPosition(searchParams.address, trimmedProtocols);
 
+  const lookBack = searchParams.lookBack || 180;
+
   const positionProtocols = trimmedProtocols.filter((protocol) =>
     position.some((p) => p.protocol.protocol === protocol.protocol)
   );
@@ -22,7 +24,7 @@ export default async function PositionPage({ searchParams }) {
   const tokenPrices = await fetchTokenPrices();
   const covarianceMatrices = await fetchCovarianceMatrices(
     positionProtocols,
-    180
+    lookBack
   );
 
   return (

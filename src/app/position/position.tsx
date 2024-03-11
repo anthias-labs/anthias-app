@@ -10,8 +10,9 @@ import {
   getTokenSymbol,
   protocolToTitle,
   roundedHealthFactor,
+  formatAddress,
 } from "../_utils/textHandling";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader } from "@mantine/core";
 
 import {
@@ -30,13 +31,18 @@ export default function Position({
   covarianceMatrices,
 }) {
   const [position, setPosition] = useState(defaultPosition || []);
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState(searchParams.address || "");
   const [tokenIcons, setTokenIcons] = useState({});
-  const [lookBack, setLookBack] = useState(180); // Default 180 days
-  const [lookForward, setLookForward] = useState(30); // Default 30 days
-  const [alpha, setAlpha] = useState(0.05); // Default 5%
+  const [lookBack, setLookBack] = useState(searchParams.lookBack || "180"); // Default 180 days
+  const [lookForward, setLookForward] = useState(
+    searchParams.lookForward || "30"
+  ); // Default 30 days
+  const [probabilityCutoff, setProbabilityCutoff] = useState(
+    searchParams.probabilityCutoff || ".05"
+  ); // Default 5%
   const [riskProfile, setRiskProfile] = useState({});
   const router = useRouter();
+  const nextSearchParams = useSearchParams();
 
   const pieColors = [
     "#1FCFCF",
@@ -50,12 +56,12 @@ export default function Position({
   useEffect(() => {
     setAddress(searchParams.address || "");
 
-    const lookForward = searchParams.lookForward || 30;
-    setLookForward(lookForward);
-    const lookBack = searchParams.lookBack || 180;
+    const lookBack = searchParams.lookBack || "180";
     setLookBack(lookBack);
-    const alpha = searchParams.alpha || 0.05;
-    setAlpha(alpha);
+    const lookForward = searchParams.lookForward || "30";
+    setLookForward(lookForward);
+    const probabilityCutoff = searchParams.probabilityCutoff || ".05";
+    setProbabilityCutoff(probabilityCutoff);
 
     if (defaultPosition) {
       let newPosition = defaultPosition;
@@ -118,32 +124,18 @@ export default function Position({
       });
       setPosition(newPosition);
 
-      const riskProfile = newPosition
-        .map((protocol) => {
-          const protocolRiskProfile = analyzePosition(
-            covarianceMatrices[
-              `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
-            ],
-            protocol,
-            lookForward
-          );
-
-          return {
-            [`${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`]:
-              protocolRiskProfile,
-          };
-        })
-        .reduce((acc, cur) => {
-          return { ...acc, ...cur };
-        });
-      setRiskProfile(riskProfile);
-
       // Getting token icons
       fetchTokenIcons(tokenArray, false, false).then((icons) => {
         setTokenIcons(icons);
       });
     }
-  }, [searchParams]);
+  }, [defaultPosition]);
+
+  useEffect(() => {
+    if (position.length > 0) {
+      refreshRiskProfile(position);
+    }
+  }, [position, lookForward, lookBack, probabilityCutoff, covarianceMatrices]);
 
   function handleSearch(address) {
     if (address === searchParams.address) {
@@ -157,6 +149,12 @@ export default function Position({
     }
 
     setPosition([]);
+  }
+
+  function handleParameterChange(parameter, value) {
+    const newSearchParams = new URLSearchParams(nextSearchParams);
+    newSearchParams.set(parameter, value);
+    router.push(`/position?${newSearchParams.toString()}`);
   }
 
   function CustomTooltip(props) {
@@ -196,10 +194,6 @@ export default function Position({
   }
 
   function getTokensWithHighCorrelation(tokenA, protocol, covarianceMatrix) {
-    // console.log("correlation protocol", protocol);
-    // console.log("correlation token", tokenA);
-    // console.log("covariance matrix", covarianceMatrix);
-
     if (!protocol.token_array) {
       return ["NA"];
     }
@@ -210,8 +204,7 @@ export default function Position({
       2 * covarianceMatrix.indexToToken[getTokenSymbol(tokenA.symbol)];
 
     protocol.token_array.forEach((tokenB) => {
-      console.log("tokenB", tokenB);
-      if (tokenB === tokenA.symbol) {
+      if (getTokenSymbol(tokenB) === getTokenSymbol(tokenA.symbol)) {
         return;
       }
 
@@ -220,8 +213,6 @@ export default function Position({
 
       const correlation =
         covarianceMatrix.correlation[tokenAIndex][tokenBIndex];
-
-      // console.log(tokenA.symbol, tokenAIndex, tokenB, tokenBIndex, correlation);
 
       // If absolute value of correlation is greater than 0.75
       if (Math.abs(correlation) > 0.75) {
@@ -232,12 +223,35 @@ export default function Position({
     return highCorrelationTokens.length === 0 ? ["NA"] : highCorrelationTokens;
   }
 
-  function analyzePosition(covarianceMatrix, protocol, lookForward) {
+  function refreshRiskProfile(position) {
+    const riskProfile = position
+      .map((protocol) => {
+        const protocolRiskProfile = analyzeProtocol(
+          covarianceMatrices[
+            `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
+          ],
+          protocol,
+          lookForward
+        );
+
+        return {
+          [protocol.protocol.protocol]: protocolRiskProfile,
+        };
+      })
+      .reduce((acc, cur) => {
+        return { ...acc, ...cur };
+      });
+
+    setRiskProfile(riskProfile);
+  }
+
+  function analyzeProtocol(covarianceMatrix, protocol, lookForward) {
     let positionVector = {};
     const total = protocol.total_supplied + protocol.total_borrowed;
     const difference = protocol.total_supplied - protocol.total_borrowed;
     let positionVariance = 0;
     let positionMeanReturn = 0;
+    lookForward = Number(lookForward);
 
     protocol.position.supplied.forEach((token) => {
       positionVector[`${getTokenSymbol(token.symbol)}_supplied`] =
@@ -286,10 +300,55 @@ export default function Position({
     );
 
     const probability = cdfNormal(zScore, 0, 1);
+    const daysToLiquidation = getDaysToLiquidation(
+      total,
+      difference,
+      positionVariance,
+      positionMeanReturn,
+      probabilityCutoff
+    );
 
     return {
       probability: probability,
+      daysToLiquidation: daysToLiquidation,
     };
+  }
+
+  function getDaysToLiquidation(
+    total,
+    difference,
+    variance,
+    meanReturn,
+    probabilityCutoff
+  ) {
+    probabilityCutoff = Number(probabilityCutoff);
+
+    const a = (meanReturn - variance / 2) ** 2;
+    const b =
+      -2 *
+        (meanReturn - variance / 2) *
+        Math.log((total - difference) / total) -
+      cdfNormalInverse(probabilityCutoff) ** 2 * variance;
+    const c = Math.log((total - difference) / total) ** 2;
+
+    // Calculating solutions
+    const solutionA = (-b + Math.sqrt(b ** 2 - 4 * a * c)) / (2 * a);
+    const solutionB = (-b - Math.sqrt(b ** 2 - 4 * a * c)) / (2 * a);
+
+    // Logic to return the valid solution
+    let validSolutions = [];
+    if (solutionA > 0) validSolutions.push(solutionA);
+    if (solutionB > 0) validSolutions.push(solutionB);
+
+    if (validSolutions.length === 0) {
+      return "NA"; // No positive solutions
+    } else {
+      const soonerTime = Math.min(...validSolutions); // Return the smaller positive solution
+      if (soonerTime > 1000) {
+        return "NA";
+      }
+      return soonerTime;
+    }
   }
 
   function getZScore(total, difference, variance, meanReturn, lookForward) {
@@ -298,6 +357,57 @@ export default function Position({
         (meanReturn - variance / 2) * lookForward) /
       Math.sqrt(variance * lookForward)
     );
+  }
+
+  function cdfNormalInverse(p) {
+    var a1 = -39.6968302866538,
+      a2 = 220.946098424521,
+      a3 = -275.928510446969;
+    var a4 = 138.357751867269,
+      a5 = -30.6647980661472,
+      a6 = 2.50662827745924;
+    var b1 = -54.4760987982241,
+      b2 = 161.585836858041,
+      b3 = -155.698979859887;
+    var b4 = 66.8013118877197,
+      b5 = -13.2806815528857,
+      c1 = -7.78489400243029e-3;
+    var c2 = -0.322396458041136,
+      c3 = -2.40075827716184,
+      c4 = -2.54973253934373;
+    var c5 = 4.37466414146497,
+      c6 = 2.93816398269878,
+      d1 = 7.78469570904146e-3;
+    var d2 = 0.32246712907004,
+      d3 = 2.445134137143,
+      d4 = 3.75440866190742;
+    var p_low = 0.02425,
+      p_high = 1 - p_low;
+    var q, r;
+    var retVal;
+
+    if (p < 0 || p > 1) {
+      alert("NormSInv: Argument out of range.");
+      retVal = 0;
+    } else if (p < p_low) {
+      q = Math.sqrt(-2 * Math.log(p));
+      retVal =
+        (((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6) /
+        ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+    } else if (p <= p_high) {
+      q = p - 0.5;
+      r = q * q;
+      retVal =
+        ((((((a1 * r + a2) * r + a3) * r + a4) * r + a5) * r + a6) * q) /
+        (((((b1 * r + b2) * r + b3) * r + b4) * r + b5) * r + 1);
+    } else {
+      q = Math.sqrt(-2 * Math.log(1 - p));
+      retVal =
+        -(((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6) /
+        ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+    }
+
+    return retVal;
   }
 
   function cdfNormal(x, mean, std) {
@@ -315,52 +425,96 @@ export default function Position({
 
   return (
     <div className={styles.positionContainer}>
-      <div className={styles.search}>
-        <input
-          type="text"
-          placeholder={"Search Address"}
-          value={address}
-          onChange={(e) => {
-            setAddress(e.target.value);
-            handleSearch(e.target.value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
+      <div className={styles.inputs}>
+        <div className={styles.search}>
+          <input
+            type="text"
+            placeholder={"Search Address"}
+            value={address}
+            onChange={(e) => {
+              setAddress(e.target.value);
+              handleSearch(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch(address);
+              }
+              if (e.key === "Escape") {
+                setAddress("");
+                handleSearch("");
+              }
+            }}
+            onBlur={() => {
               handleSearch(address);
-            }
-            if (e.key === "Escape") {
-              setAddress("");
-              handleSearch("");
-            }
-          }}
-          onBlur={() => {
-            handleSearch(address);
-          }}
-        />
-        {address.length > 0 && (
+            }}
+          />
+          {address.length > 0 && (
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              onClick={() => {
+                setAddress("");
+                handleSearch("");
+              }}
+              className={styles.clear}
+            >
+              <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+            </svg>
+          )}
           <svg
             viewBox="0 0 24 24"
-            fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            className={styles.searchIcon}
             onClick={() => {
-              setAddress("");
-              handleSearch("");
+              handleSearch(address);
             }}
-            className={styles.clear}
           >
-            <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
           </svg>
-        )}
-        <svg
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-          className={styles.searchIcon}
-          onClick={() => {
-            handleSearch(address);
-          }}
-        >
-          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
-        </svg>
+        </div>
+        <div className={styles.input}>
+          <span>Look Back:</span>
+          <select
+            value={lookBack}
+            onChange={(e) => {
+              setLookBack(e.target.value);
+              handleParameterChange("lookBack", e.target.value);
+              setPosition([]);
+            }}
+          >
+            <option value={"30"}>30 Days</option>
+            <option value={"90"}>90 Days</option>
+            <option value={"180"}>180 Days</option>
+          </select>
+        </div>
+        <div className={styles.input}>
+          <span>Look Forward:</span>
+          <select
+            value={lookForward}
+            onChange={(e) => {
+              setLookForward(e.target.value);
+            }}
+          >
+            <option value={"30"}>30 Days</option>
+            <option value={"90"}>90 Days</option>
+            <option value={"180"}>180 Days</option>
+          </select>
+        </div>
+        <div className={styles.input}>
+          <span>Cutoff:</span>
+          <select
+            value={probabilityCutoff}
+            onChange={(e) => {
+              setProbabilityCutoff(e.target.value);
+            }}
+          >
+            <option value={".05"}>5%</option>
+            <option value={".1"}>10%</option>
+            <option value={".2"}>20%</option>
+            <option value={".5"}>50%</option>
+          </select>
+        </div>
       </div>
       {position.length === 0 && address.length > 0 && (
         <div className={styles.loader}>
@@ -374,11 +528,27 @@ export default function Position({
       )}
       {position.length > 0 &&
         position.map((protocol, index) => {
-          console.log("mapping protocol", protocol);
           const covarianceMatrix =
             covarianceMatrices[
               `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
             ];
+
+          if (!riskProfile[protocol.protocol.protocol]) {
+            return <></>;
+          }
+
+          const formattedProbability = riskProfile[
+            protocol.protocol.protocol
+          ].probability.toLocaleString("en-US", {
+            style: "percent",
+            maximumFractionDigits: 2,
+          });
+
+          const formattedDaysToLiquidation = riskProfile[
+            protocol.protocol.protocol
+          ].daysToLiquidation.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          });
 
           return (
             <div className={styles.protocol} key={index}>
@@ -398,12 +568,6 @@ export default function Position({
                       fill="#8884d8"
                       paddingAngle={0}
                       dataKey="balance"
-                      // onClick={() => {
-                      //   window.open(
-                      //     `https://app.euler.finance/account/0?spy=${walletData.address}`,
-                      //     "_blank"
-                      //   );
-                      // }}
                       style={{ cursor: "pointer", outline: "none" }}
                     >
                       <Label
@@ -433,6 +597,34 @@ export default function Position({
                           fill: "white",
                         }}
                         className={`${styles.label} ${styles.value}`}
+                      />
+                      <Label
+                        position="center"
+                        offset={0}
+                        value={"Adjusted Supplied"}
+                        style={{
+                          fontSize: "1rem",
+                          stroke: "transparent",
+                          fill: "gray",
+                          fontWeight: "100",
+                        }}
+                        className={`${styles.label} ${styles.title} ${styles.adjusted}`}
+                      />
+                      <Label
+                        position="center"
+                        offset={0}
+                        value={
+                          "$" +
+                          protocol.adjusted_supply.toLocaleString("en-US", {
+                            maximumFractionDigits: 0,
+                          })
+                        }
+                        style={{
+                          fontSize: "1rem",
+                          stroke: "transparent",
+                          fill: "gray",
+                        }}
+                        className={`${styles.label} ${styles.value} ${styles.adjusted}`}
                       />
                       {protocol.position.supplied.map((entry, index) => {
                         // Get random offset between 0 and pieColors length
@@ -512,12 +704,6 @@ export default function Position({
                       fill="#8884d8"
                       paddingAngle={0}
                       dataKey="balance"
-                      // onClick={() => {
-                      //   window.open(
-                      //     `https://app.euler.finance/account/0?spy=${walletData.address}`,
-                      //     "_blank"
-                      //   );
-                      // }}
                       style={{ cursor: "pointer", outline: "none" }}
                     >
                       <Label
@@ -547,6 +733,34 @@ export default function Position({
                           fill: "white",
                         }}
                         className={`${styles.label} ${styles.value}`}
+                      />
+                      <Label
+                        position="center"
+                        offset={0}
+                        value={"Adjusted Borrowed"}
+                        style={{
+                          fontSize: "1rem",
+                          stroke: "transparent",
+                          fill: "gray",
+                          fontWeight: "100",
+                        }}
+                        className={`${styles.label} ${styles.title} ${styles.adjusted}`}
+                      />
+                      <Label
+                        position="center"
+                        offset={0}
+                        value={
+                          "$" +
+                          protocol.adjusted_borrow.toLocaleString("en-US", {
+                            maximumFractionDigits: 0,
+                          })
+                        }
+                        style={{
+                          fontSize: "1rem",
+                          stroke: "transparent",
+                          fill: "gray",
+                        }}
+                        className={`${styles.label} ${styles.value} ${styles.adjusted}`}
                       />
                       {protocol.position.borrowed.map((entry, index) => {
                         // Get random offset between 0 and pieColors length
@@ -591,7 +805,10 @@ export default function Position({
                     </div>
                   </div>
                   {protocol.position.supplied.map((token, index) => {
-                    console.log("supplied token", token);
+                    if (!token.value) {
+                      return <></>;
+                    }
+
                     const tokenSymbol = getTokenSymbol(token.symbol);
 
                     const value = token.value
@@ -600,14 +817,17 @@ export default function Position({
                         })
                       : 0;
 
-                    const ratio = token.value
-                      ? (
-                          (token.value * 100) /
-                          protocol.total_supplied
-                        ).toLocaleString("en-US", {
-                          maximumFractionDigits: 2,
-                        })
-                      : 0;
+                    let ratio = (
+                      (token.value * 100) /
+                      protocol.total_supplied
+                    ).toLocaleString("en-US", {
+                      maximumFractionDigits: 2,
+                    });
+                    if (Number(ratio) > 100) ratio = "100";
+
+                    if ((token.value * 100) / protocol.total_supplied < 0.01) {
+                      return <></>;
+                    }
 
                     return (
                       <div className={styles.row} key={index}>
@@ -656,6 +876,10 @@ export default function Position({
                       <div className={styles.col}></div>
                     </div>
                     {protocol.position.borrowed.map((token, index) => {
+                      if (!token.value) {
+                        return <></>;
+                      }
+
                       const tokenSymbol = getTokenSymbol(token.symbol);
 
                       const value = token.value
@@ -664,14 +888,20 @@ export default function Position({
                           })
                         : 0;
 
-                      const ratio = token.value
-                        ? (
-                            (token.value * 100) /
-                            protocol.total_borrowed
-                          ).toLocaleString("en-US", {
-                            maximumFractionDigits: 2,
-                          })
-                        : 0;
+                      let ratio = (
+                        (token.value * 100) /
+                        protocol.total_borrowed
+                      ).toLocaleString("en-US", {
+                        maximumFractionDigits: 2,
+                      });
+                      if (Number(ratio) > 100) ratio = "100";
+
+                      if (
+                        (token.value * 100) / protocol.total_borrowed <
+                        0.01
+                      ) {
+                        return <></>;
+                      }
 
                       return (
                         <div className={styles.row} key={index}>
@@ -703,6 +933,22 @@ export default function Position({
                     })}
                   </div>
                 )}
+              </div>
+              <div className={styles.summary}>
+                <div className={styles.title}>Position Summary</div>
+                <div className={styles.description}>
+                  Based on{" "}
+                  <span>
+                    {formatAddress(address)}
+                    {"'"}s
+                  </span>{" "}
+                  holdings over the past <span>{lookBack}</span> days, the
+                  probability of liquidation in the next{" "}
+                  <span>{lookForward}</span> days is
+                  <span> {formattedProbability}</span>, and the time to reach a{" "}
+                  <span>{probabilityCutoff * 100}%</span> probability of
+                  liquidation is <span>{formattedDaysToLiquidation}</span> days.
+                </div>
               </div>
             </div>
           );
