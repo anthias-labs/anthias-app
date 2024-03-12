@@ -115,12 +115,12 @@ export default function Navbar({ protocols }) {
       icon: walletsImg || defaultImg,
       placeholder: "Address",
     },
-    account: {
-      label: "Account",
-      value: "account",
-      icon: fishImg,
-      placeholder: "Actions",
-    },
+    // account: {
+    //   label: "Account",
+    //   value: "account",
+    //   icon: fishImg,
+    //   placeholder: "Actions",
+    // },
   };
 
   useEffect(() => {

@@ -1,7 +1,6 @@
-"use server";
+"use client";
 
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 interface DataPoint {
   symbol: string;
@@ -18,9 +17,9 @@ interface TransformedDataEntry {
 }
 
 export default async function fetchProtocolMarkets(
-  protocol: String
+  protocol: string
 ): Promise<TransformedDataEntry[] | null> {
-  const supabase = createServerActionClient({ cookies });
+  const supabase = createClientComponentClient();
   let transformedData: { [underlying_symbol: string]: TransformedDataEntry } =
     {};
 

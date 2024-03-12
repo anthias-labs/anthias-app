@@ -48,6 +48,7 @@ export default async function PositionsTable({ params, searchParams }) {
 
     filters: {
       protocol: protocol,
+      showTokens: true,
     },
 
     exports: true,

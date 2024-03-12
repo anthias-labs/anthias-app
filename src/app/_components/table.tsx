@@ -101,7 +101,10 @@ export default function Table({
         </div>
         <div className={styles.section}>
           {tableProps.filters && (
-            <Filters protocol={tableProps.filters.protocol} />
+            <Filters
+              protocol={tableProps.filters.protocol}
+              showTokens={tableProps.filters.showTokens || false}
+            />
           )}
         </div>
       </div>

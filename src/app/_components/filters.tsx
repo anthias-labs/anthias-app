@@ -2,15 +2,18 @@
 
 import styles from "./filters.module.scss";
 
+import defaultImg from "@/assets/icons/defaultProtocol.svg";
 import { ActionIcon, Select, Button, Popover, Checkbox } from "@mantine/core";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getTokenSymbol } from "../_utils/textHandling";
 import fetchNumData from "../_api/fetchNumData";
 import fetchProtocols from "../_api/fetchProtocols";
 import fetchProtocolIcons from "../_api/fetchProtocolIcons";
+import fetchTokenIcons from "../_api/fetchTokenIcons";
 import blobToBase64 from "../_api/blobToBase64";
+import fetchProtocolMarkets from "../_api/fetchProtocolMarketsClient";
 import Image from "next/image";
-import { titleCase } from "../_utils/textHandling";
 
 export default function FilterBar({
   protocol,
@@ -21,6 +24,7 @@ export default function FilterBar({
     sort: "total_borrowed",
     limit: 10,
     paginate: [1, 10],
+    tokens: [],
   };
 
   const [filters, setFilters] = useState(defaultFilters);
@@ -29,6 +33,8 @@ export default function FilterBar({
   const [protocols, setProtocols] = useState([]);
   const [selectedProtocols, setSelectedProtocols] = useState([]);
   const [search, setSearch] = useState("");
+  const [markets, setMarkets] = useState([]);
+  const [tokenIcons, setTokenIcons] = useState({});
 
   const router = useRouter();
   const currentPath = usePathname();
@@ -68,15 +74,24 @@ export default function FilterBar({
       setSelectedProtocols(tempSelectedProtocolsUnique);
     }
 
+    async function fetchTokensInfo() {
+      const markets = await fetchProtocolMarkets(protocol);
+      setMarkets(markets);
+
+      // get an array of each market.underlying_symbol
+      const tokensArray = markets.map((market) => market.underlying_symbol);
+      // Getting token icons
+      fetchTokenIcons(tokensArray, false, false).then((icons) => {
+        setTokenIcons(icons);
+      });
+    }
+
     showProtocol && fetchProtocolsInfo();
+    showTokens && fetchTokensInfo();
   }, []);
 
   useEffect(() => {
-    let tempFilters: {
-      sort: string;
-      limit: number;
-      paginate: number[];
-    } = { ...defaultFilters };
+    let tempFilters = { ...defaultFilters };
 
     const keys = Array.from(searchParams.keys());
 
@@ -94,6 +109,8 @@ export default function FilterBar({
       } else if (field === "search") {
         setSearch(values[0]);
         tempFilters[field] = values[0];
+      } else if (field === "tokens") {
+        tempFilters[field] = values;
       }
     }
 
@@ -142,6 +159,14 @@ export default function FilterBar({
     updateQueryParams(tempFilters);
   }
 
+  function updateTokens(tokens) {
+    let tempFilters = { ...filters };
+    tempFilters.tokens = tokens;
+    setFilters(tempFilters);
+
+    updateQueryParams(tempFilters);
+  }
+
   function updatePaginate(direction) {
     let tempFilters = { ...filters };
 
@@ -175,15 +200,15 @@ export default function FilterBar({
   }
 
   function updateSearch(name: string) {
-    let currentParams = new URLSearchParams(searchParams.toString());
+    let newParams = new URLSearchParams(searchParams.toString());
 
     if (name === "") {
-      currentParams.delete("search");
+      newParams.delete("search");
     } else {
-      currentParams.set("search", name);
+      newParams.set("search", name);
     }
 
-    router.push(`${currentPath}?${currentParams.toString()}`, {
+    router.push(`${currentPath}?${newParams.toString()}`, {
       scroll: false,
     });
   }
@@ -197,6 +222,7 @@ export default function FilterBar({
 
     newParams.set("limit", filters.limit);
     newParams.set("paginate", filters.paginate.join(","));
+    newParams.set("tokens", filters.tokens.join(","));
 
     router.push(`${currentPath}?${newParams.toString()}`, { scroll: false });
   }
@@ -271,29 +297,7 @@ export default function FilterBar({
           </Button>
         </Popover.Target>
         <Popover.Dropdown className={styles.filterDropdown}>
-          <div className={styles.filter}>
-            <Button
-              className={styles.button}
-              onClick={() => updateQueryParams(defaultFilters)}
-            >
-              Clear
-            </Button>
-          </div>
-          {showTokens && (
-            <div className={styles.filter}>
-              <Popover position="bottom">
-                <Popover.Target>
-                  <Button className={styles.button}>Tokens</Button>
-                </Popover.Target>
-                <Popover.Dropdown className={styles.dropdown}>
-                  <div className={`${styles.popover} ${styles.tokens}`}>
-                    Popover Popover Popover Popover Popover Popover
-                  </div>
-                </Popover.Dropdown>
-              </Popover>
-            </div>
-          )}
-          {showProtocol && (
+          {/* {showProtocol && (
             <div className={styles.filter}>
               <Popover position="top">
                 <Popover.Target>
@@ -350,42 +354,175 @@ export default function FilterBar({
                 </Popover.Dropdown>
               </Popover>
             </div>
-          )}
-          {protocol !== "tokens" && (
+          )} */}
+          <div
+            className={styles.section}
+            style={{
+              zIndex: 1000,
+            }}
+          >
+            {protocol !== "tokens" && (
+              <div className={styles.filter}>
+                Sort:
+                <Select
+                  classNames={{
+                    input: styles.selectInput,
+                    dropdown: styles.selectDropdown,
+                    item: styles.selectItem,
+                  }}
+                  style={{ width: "9.5rem" }}
+                  placeholder="Sort Mode"
+                  data={["Total Supplied", "Total Borrowed"]}
+                  value={sortMode}
+                  maxDropdownHeight={200}
+                  onChange={(value) => {
+                    setSortMode(value);
+                    updateSortMode(value);
+                  }}
+                />
+              </div>
+            )}
             <div className={styles.filter}>
-              Sort:
+              Amount:
               <Select
                 classNames={{
                   input: styles.selectInput,
                   dropdown: styles.selectDropdown,
                   item: styles.selectItem,
                 }}
-                style={{ width: "9.5rem" }}
-                placeholder="Sort Mode"
-                data={["Total Supplied", "Total Borrowed"]}
-                value={sortMode}
+                style={{ width: "5.5rem" }}
+                data={["10", "25", "50", "100", "500", "1000"]}
+                value={filters.limit.toString()}
                 maxDropdownHeight={200}
-                onChange={(value) => {
-                  setSortMode(value);
-                  updateSortMode(value);
-                }}
+                onChange={(value) => updateLimit(value)}
               />
             </div>
+          </div>
+          {showTokens && (
+            <div className={`${styles.section} ${styles.tokens}`}>
+              <div className={styles.side}>
+                <span className={styles.title}>Supplied Tokens</span>
+                <div className={styles.scrollBox}>
+                  {markets.map((market, index) => {
+                    return (
+                      <div
+                        key={index}
+                        className={styles.token}
+                        onClick={() => {
+                          let tempSelectedTokens = [...filters.tokens];
+
+                          if (
+                            !filters.tokens.includes(
+                              `Supplied ${market.underlying_symbol}`
+                            )
+                          ) {
+                            tempSelectedTokens.push(
+                              `Supplied ${market.underlying_symbol}`
+                            );
+                          } else {
+                            tempSelectedTokens = tempSelectedTokens.filter(
+                              (selectedToken) =>
+                                selectedToken !==
+                                `Supplied ${market.underlying_symbol}`
+                            );
+                          }
+
+                          updateTokens(tempSelectedTokens);
+                        }}
+                      >
+                        <Checkbox
+                          classNames={{
+                            input: styles.checkboxInput,
+                          }}
+                          checked={filters.tokens.includes(
+                            `Supplied ${market.underlying_symbol}`
+                          )}
+                          size={"xs"}
+                        />
+                        <Image
+                          src={
+                            tokenIcons[
+                              getTokenSymbol(market.underlying_symbol)
+                            ] || defaultImg
+                          }
+                          alt="token"
+                          width={22}
+                          height={22}
+                        />
+                        {getTokenSymbol(market.underlying_symbol)}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className={styles.side}>
+                <span className={styles.title}>Borrowed Tokens</span>
+                <div className={styles.scrollBox}>
+                  {markets.map((market, index) => {
+                    return (
+                      <div
+                        key={index}
+                        className={styles.token}
+                        onClick={() => {
+                          let tempSelectedTokens = [...filters.tokens];
+
+                          if (
+                            !filters.tokens.includes(
+                              `Borrowed ${market.underlying_symbol}`
+                            )
+                          ) {
+                            tempSelectedTokens.push(
+                              `Borrowed ${market.underlying_symbol}`
+                            );
+                          } else {
+                            tempSelectedTokens = tempSelectedTokens.filter(
+                              (selectedToken) =>
+                                selectedToken !==
+                                `Borrowed ${market.underlying_symbol}`
+                            );
+                          }
+
+                          updateTokens(tempSelectedTokens);
+                        }}
+                      >
+                        <Checkbox
+                          classNames={{
+                            input: styles.checkboxInput,
+                          }}
+                          checked={filters.tokens.includes(
+                            `Borrowed ${market.underlying_symbol}`
+                          )}
+                          size={"xs"}
+                        />
+                        <Image
+                          src={
+                            tokenIcons[
+                              getTokenSymbol(market.underlying_symbol)
+                            ] || defaultImg
+                          }
+                          alt="token"
+                          width={22}
+                          height={22}
+                        />
+                        {getTokenSymbol(market.underlying_symbol)}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           )}
-          <div className={styles.filter}>
-            Amount:
-            <Select
-              classNames={{
-                input: styles.selectInput,
-                dropdown: styles.selectDropdown,
-                item: styles.selectItem,
-              }}
-              style={{ width: "5.5rem" }}
-              data={["10", "25", "50", "100", "500", "1000"]}
-              value={filters.limit.toString()}
-              maxDropdownHeight={200}
-              onChange={(value) => updateLimit(value)}
-            />
+          <div className={styles.section}>
+            <div className={styles.filter}>Health Factor</div>
+
+            <div className={styles.filter}>
+              <Button
+                className={styles.button}
+                onClick={() => updateQueryParams(defaultFilters)}
+              >
+                Clear
+              </Button>
+            </div>
           </div>
         </Popover.Dropdown>
       </Popover>

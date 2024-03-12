@@ -37,10 +37,10 @@ export default async function HomePage() {
         //   name: "Tokens",
         //   mode: "tokens",
         // },
-        {
-          name: "Account",
-          mode: "account",
-        },
+        // {
+        //   name: "Account",
+        //   mode: "account",
+        // },
       ],
 
       icons: [protocolsImg, walletsImg, fishImg],
