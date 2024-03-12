@@ -407,7 +407,7 @@ export default function BubbleGraph({ protocol, initialData, thisProtocol }) {
           />
         </div>
         <div className={styles.right}>
-          <Filters protocol={protocol} />
+          <Filters protocol={protocol} showTokens={true} />
         </div>
       </div>
       <Graph data={graphData} options={options} />
