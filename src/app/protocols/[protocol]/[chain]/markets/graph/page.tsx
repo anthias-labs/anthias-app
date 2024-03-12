@@ -8,7 +8,7 @@ export default async function MarketsGraph({ params, searchParams }) {
   const protocol = params.chain;
 
   const urlSearchParams = new URLSearchParams(searchParams);
-  const initialData = await fetchProtocolMarkets(protocol, urlSearchParams);
+  const initialData = await fetchProtocolMarkets(protocol);
 
   // const token_symbols = initialData.map((market) => market.token_symbol);
   // const initialIcons = await fetchTokenIcons(token_symbols);
