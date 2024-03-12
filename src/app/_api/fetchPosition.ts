@@ -13,7 +13,7 @@ export default async function fetchPosition(address, protocols) {
     let positionQuery = supabase
       .from(`${protocol.protocol}_addresses`)
       .select("*")
-      .ilike("address", `%${address}%`);
+      .eq("address", address);
 
     const { data: positionData, error: positionError } = await positionQuery;
 
@@ -23,13 +23,12 @@ export default async function fetchPosition(address, protocols) {
     }
 
     if (positionData && positionData.length > 0) {
-      let position = positionData[0];
-      position["protocol"] = protocol;
+      let marketPositions = [];
 
       let tokenQuery = supabase
         .from(`${protocol.protocol}_balances`)
         .select("*")
-        .ilike("address", `%${address}%`);
+        .eq("address", address);
 
       const { data: tokenData, error: tokenError } = await tokenQuery;
 
@@ -39,22 +38,44 @@ export default async function fetchPosition(address, protocols) {
       }
 
       if (tokenData && tokenData.length > 0) {
-        position["position"] = {};
-        position["position"]["supplied"] = [];
-        position["position"]["borrowed"] = [];
-        position["position"]["lent"] = [];
-
         for (const token of tokenData) {
+          const market = token.metadata.market;
+          const isNewMarket = !marketPositions.some((p) => p.market === market);
+          let position = null;
+
+          if (isNewMarket) {
+            let newPosition = {
+              ...positionData[0],
+              market: market,
+              protocol: protocol,
+              position: {
+                supplied: [],
+                borrowed: [],
+              },
+            };
+
+            position = newPosition;
+          } else {
+            position = marketPositions.find((p) => p.market === market);
+          }
+
           if (token.type === "Supplied") {
             position["position"]["supplied"].push(token);
           } else if (token.type === "Borrowed") {
             position["position"]["borrowed"].push(token);
-          } else if (token.type === "Lent") {
-            position["position"]["lent"].push(token);
+          }
+
+          // If the position is not already in the list, add it
+          if (isNewMarket) {
+            marketPositions.push(position);
+          } else {
+            // Else replace it
+            const index = marketPositions.findIndex((p) => p.market === market);
+            marketPositions[index] = position;
           }
         }
 
-        retData.push(position);
+        retData = [...retData, ...marketPositions];
       }
     }
   }

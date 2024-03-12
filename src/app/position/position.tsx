@@ -223,13 +223,16 @@ export default function Position({
     return highCorrelationTokens.length === 0 ? ["NA"] : highCorrelationTokens;
   }
 
+  function getLiquidationFee(token, covarianceMatrix) {
+  }
+
   function refreshRiskProfile(position) {
     const riskProfile = position
       .map((protocol) => {
         const protocolRiskProfile = analyzeProtocol(
           covarianceMatrices[
             `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
-          ],
+          ][protocol.market],
           protocol,
           lookForward
         );
@@ -531,7 +534,7 @@ export default function Position({
           const covarianceMatrix =
             covarianceMatrices[
               `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
-            ];
+            ][protocol.market];
 
           if (!riskProfile[protocol.protocol.protocol]) {
             return <></>;
@@ -669,6 +672,7 @@ export default function Position({
                       height={35}
                     />
                   </div>
+                  <div className={styles.market}>{protocol.market} Market</div>
                   <div
                     className={getHealthFactorClass(
                       Number(roundedHealthFactor(protocol.health_factor)),
