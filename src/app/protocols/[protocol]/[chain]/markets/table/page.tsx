@@ -47,7 +47,7 @@ export default async function MarketsTable({ params, searchParams }) {
   };
 
   const urlSearchParams = new URLSearchParams(searchParams);
-  const initialData = await fetchProtocolMarkets(protocol, urlSearchParams);
+  const initialData = await fetchProtocolMarkets(protocol);
 
   return <Table tableProps={tableProps} initialData={initialData} />;
 }
