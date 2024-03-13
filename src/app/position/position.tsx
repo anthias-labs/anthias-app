@@ -572,11 +572,11 @@ export default function Position({
       )}
       {position.length > 0 &&
         position.map((protocol, index) => {
-          if (protocol.total_supplied < 1) {
+          const metadata = protocol.metadata[protocol.market] || null;
+
+          if (metadata.total_supplied < 1 || !metadata) {
             return <></>;
           }
-
-          const metadata = protocol.metadata[protocol.market];
 
           const covarianceMatrix =
             covarianceMatrices[
@@ -1048,7 +1048,8 @@ export default function Position({
                       (
                         riskProfile[
                           `${protocol.protocol.protocol}-${protocol.market}`
-                        ].probability * protocol.metadata[protocol.market].total_supplied
+                        ].probability *
+                        protocol.metadata[protocol.market].total_supplied
                       ).toLocaleString("en-US", {
                         maximumFractionDigits: 0,
                       })}
