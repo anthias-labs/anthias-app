@@ -122,7 +122,9 @@ export default function FilterBar({
         tempFilters[field] = values;
       } else if (field === "health_factor") {
         tempFilters[field] = values.map(Number);
-        setHealthFactorRange(values.map(Number));
+        values.map(Number).length > 1
+          ? setHealthFactorRange(values.map(Number))
+          : setHealthFactorRange([0, 5]);
       }
     }
 
@@ -165,7 +167,7 @@ export default function FilterBar({
   function updateHealthFactorRange(range) {
     let tempFilters = { ...filters };
 
-    if (range[0] === 0 && range[1] === 4) {
+    if (range[0] === 0 && range[1] === 5) {
       tempFilters.health_factor = [];
     } else {
       tempFilters.health_factor = range;
@@ -574,7 +576,10 @@ export default function FilterBar({
             <div className={styles.filter}>
               <Button
                 className={styles.button}
-                onClick={() => updateQueryParams(defaultFilters)}
+                onClick={() => {
+                  updateQueryParams(defaultFilters);
+                  setHealthFactorRange([0, 5]);
+                }}
               >
                 Clear
               </Button>
