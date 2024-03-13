@@ -3,7 +3,14 @@
 import styles from "./filters.module.scss";
 
 import defaultImg from "@/assets/icons/defaultProtocol.svg";
-import { ActionIcon, Select, Button, Popover, Checkbox } from "@mantine/core";
+import {
+  ActionIcon,
+  Select,
+  Button,
+  Popover,
+  Checkbox,
+  RangeSlider,
+} from "@mantine/core";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getTokenSymbol } from "../_utils/textHandling";
@@ -25,6 +32,7 @@ export default function FilterBar({
     limit: 10,
     paginate: [1, 10],
     tokens: [],
+    health_factor: [],
   };
 
   const [filters, setFilters] = useState(defaultFilters);
@@ -33,6 +41,7 @@ export default function FilterBar({
   const [protocols, setProtocols] = useState([]);
   const [selectedProtocols, setSelectedProtocols] = useState([]);
   const [search, setSearch] = useState("");
+  const [healthFactorRange, setHealthFactorRange] = useState([0, 5]);
   const [markets, setMarkets] = useState([]);
   const [tokenIcons, setTokenIcons] = useState({});
 
@@ -111,6 +120,9 @@ export default function FilterBar({
         tempFilters[field] = values[0];
       } else if (field === "tokens") {
         tempFilters[field] = values;
+      } else if (field === "health_factor") {
+        tempFilters[field] = values.map(Number);
+        setHealthFactorRange(values.map(Number));
       }
     }
 
@@ -145,6 +157,20 @@ export default function FilterBar({
 
     let tempFilters = { ...filters };
     tempFilters.sort = modeValue;
+    setFilters(tempFilters);
+
+    updateQueryParams(tempFilters);
+  }
+
+  function updateHealthFactorRange(range) {
+    let tempFilters = { ...filters };
+
+    if (range[0] === 0 && range[1] === 4) {
+      tempFilters.health_factor = [];
+    } else {
+      tempFilters.health_factor = range;
+    }
+
     setFilters(tempFilters);
 
     updateQueryParams(tempFilters);
@@ -223,6 +249,7 @@ export default function FilterBar({
     newParams.set("limit", filters.limit);
     newParams.set("paginate", filters.paginate.join(","));
     newParams.set("tokens", filters.tokens.join(","));
+    newParams.set("health_factor", filters.health_factor.join(","));
 
     router.push(`${currentPath}?${newParams.toString()}`, { scroll: false });
   }
@@ -513,7 +540,36 @@ export default function FilterBar({
             </div>
           )}
           <div className={styles.section}>
-            <div className={styles.filter}>Health Factor</div>
+            <div className={styles.filter}>
+              Health Factor:
+              <RangeSlider
+                classNames={{
+                  root: styles.rangeSlider,
+                  bar: styles.rangeSliderBar,
+                  thumb: styles.rangeSliderThumb,
+                  track: styles.rangeSliderTrack,
+                }}
+                color="#1fcfcf"
+                label={(value) => {
+                  if (value === 5) return "inf";
+
+                  return `${value.toFixed(1)}`;
+                }}
+                min={0}
+                max={5}
+                step={0.1}
+                minRange={0.3}
+                size={"sm"}
+                thumbSize={12}
+                value={[healthFactorRange[0], healthFactorRange[1]]}
+                onChange={(value) => {
+                  setHealthFactorRange(value);
+                }}
+                onChangeEnd={(value) => {
+                  updateHealthFactorRange(value);
+                }}
+              />
+            </div>
 
             <div className={styles.filter}>
               <Button

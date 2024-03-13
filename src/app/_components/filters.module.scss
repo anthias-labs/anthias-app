@@ -158,42 +158,16 @@
       font-weight: 400;
     }
 
-    .dropdown {
-      padding: 0.5rem 1rem;
-      background-color: $darkAqua;
-      padding: 0.25rem;
-      border-radius: 0.25rem;
-      border: none;
+    .rangeSlider {
+      width: 150px;
 
-      .popover {
-        &.protocols {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
+      .rangeSliderBar {
+        background-color: $aqua;
+      }
 
-          .protocol {
-            display: flex;
-            gap: 1rem;
-            flex-direction: row;
-            align-items: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            padding: 0.5rem;
-            border-radius: 0.25rem;
-
-            &:hover,
-            &.selected {
-              background-color: $aqua;
-            }
-
-            .protocolInfo {
-              display: flex;
-              flex-direction: row;
-              gap: 0.5rem;
-              align-items: center;
-            }
-          }
-        }
+      .rangeSliderThumb {
+        border-color: $aqua;
+        background-color: $aqua;
       }
     }
 
@@ -245,6 +219,45 @@
     [data-selected="true"],
     [data-hovered="true"] {
       background-color: $darkAqua;
+    }
+
+    .dropdown {
+      padding: 0.5rem 1rem;
+      background-color: $darkAqua;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      border: none;
+
+      .popover {
+        &.protocols {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          .protocol {
+            display: flex;
+            gap: 1rem;
+            flex-direction: row;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+
+            &:hover,
+            &.selected {
+              background-color: $aqua;
+            }
+
+            .protocolInfo {
+              display: flex;
+              flex-direction: row;
+              gap: 0.5rem;
+              align-items: center;
+            }
+          }
+        }
+      }
     }
   }
 

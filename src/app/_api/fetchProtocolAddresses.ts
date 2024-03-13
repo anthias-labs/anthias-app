@@ -42,6 +42,12 @@ export default async function fetchProtocolAddresses(protocol: string, params) {
       } else {
         positionQuery = positionQuery.range(first, 1000);
       }
+    } else if (key === "health_factor") {
+      const lower = value.split(",")[0];
+      const upper = value.split(",")[1];
+
+      positionQuery = positionQuery.gte("health_factor", lower);
+      positionQuery = positionQuery.lte("health_factor", upper);
     }
   }
 
