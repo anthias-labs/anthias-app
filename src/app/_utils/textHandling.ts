@@ -122,3 +122,27 @@ export function getHash() {
   const hash = crypto.createHash("sha256").update(randomData).digest("hex");
   return hash.substring(0, 16);
 }
+
+const marketMap = {
+  "arbitrum-0x9c4ec768c28520b50860ea7a15bd7213a9ff58bf": "USDC",
+  "base-0x46e6b214b524310239732d51387075e0e70970bf": "WETH",
+  "ethereum-0xc3d688b66703497daa19211eedff47f25384cdc3": "USDC",
+  "arbitrum-0xa5edbdd9646f8dff606d7448e414884c7d905dca": "USDC.e",
+  "polygon-0xf25212e676d1f7f89cd72ffee66158f541246445": "USDC",
+  "base-0x9c4ec768c28520b50860ea7a15bd7213a9ff58bf": "USDbC",
+  "ethereum-0xa17581a9e3356d9a858b789d68b4d866e593ae94": "WETH",
+};
+
+export function getMarketSymbol(market: string) {
+  return marketMap[market];
+}
+
+export function getMarkets() {
+  // Returns an array of market getTokenSymbols
+  const markets = Object.values(marketMap);
+  const marketSymbols = markets.map((market) => getTokenSymbol(market));
+
+  return [
+    ...new Set(marketSymbols), // Remove duplicates
+  ];
+}

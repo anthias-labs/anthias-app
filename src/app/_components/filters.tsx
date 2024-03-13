@@ -141,7 +141,7 @@ export default function FilterBar({
     }
 
     async function fetchNumDataOnEffect() {
-      const count = (await fetchNumData(protocol)) as number;
+      const count = (await fetchNumData(protocol, searchParams)) as number;
       setNumData(count);
     }
 
@@ -589,7 +589,8 @@ export default function FilterBar({
       </Popover>
       <div className={styles.paginate}>
         <div className={`${styles.filter} ${styles.pageLabel}`}>
-          {filters.paginate[0]} - {filters.paginate[1]} of {numData}
+          {filters.paginate[0]} - {Math.min(filters.paginate[1], numData)} of{" "}
+          {numData}
         </div>
         <div className={styles.filter}>
           <ActionIcon

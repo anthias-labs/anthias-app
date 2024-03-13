@@ -131,6 +131,16 @@
           font-size: 1.15rem;
         }
 
+        .market {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.5rem;
+          white-space: nowrap;
+          justify-content: center;
+          font-size: 1.15rem;
+        }
+
         .healthFactor {
           display: flex;
           flex-direction: row;

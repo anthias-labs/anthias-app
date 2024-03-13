@@ -11,6 +11,8 @@ import {
   protocolToTitle,
   roundedHealthFactor,
   formatAddress,
+  getMarketSymbol,
+  getMarkets,
 } from "../_utils/textHandling";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader } from "@mantine/core";
@@ -583,6 +585,10 @@ export default function Position({
             return <></>;
           }
 
+          console.log("protocol", protocol);
+
+          console.log("cov Matrix", covarianceMatrix);
+
           const formattedProbability = riskProfile[
             `${protocol.protocol.protocol}-${protocol.market}`
           ].probability.toLocaleString("en-US", {
@@ -595,6 +601,10 @@ export default function Position({
           ].daysToLiquidation.toLocaleString("en-US", {
             maximumFractionDigits: 0,
           });
+
+          const marketName = getMarketSymbol(
+            `${protocol.protocol.chain}-${protocol.market}`
+          );
 
           return (
             <div className={styles.protocol} key={index}>
@@ -715,7 +725,7 @@ export default function Position({
                       height={35}
                     />
                   </div>
-                  <div className={styles.market}>{protocol.market} Market</div>
+                  <div className={styles.market}>{marketName} Market</div>
                   <div
                     className={getHealthFactorClass(
                       Number(roundedHealthFactor(protocol.health_factor)),
@@ -842,6 +852,9 @@ export default function Position({
                       <span>Dollar Amount</span>
                     </div>
                     <div className={styles.col}>
+                      <span>Balance</span>
+                    </div>
+                    <div className={styles.col}>
                       <span>Position Ratio</span>
                     </div>
                     <div className={styles.col}>
@@ -858,8 +871,14 @@ export default function Position({
 
                     const tokenSymbol = getTokenSymbol(token.symbol);
 
-                    const value = token.value
+                    const formattedValue = token.value
                       ? token.value.toLocaleString("en-US", {
+                          maximumFractionDigits: 2,
+                        })
+                      : 0;
+
+                    const formattedBalance = token.balance
+                      ? token.balance.toLocaleString("en-US", {
                           maximumFractionDigits: 2,
                         })
                       : 0;
@@ -891,7 +910,10 @@ export default function Position({
                           />
                           {tokenSymbol}
                         </div>
-                        <div className={styles.col}>${value}</div>
+                        <div className={styles.col}>${formattedValue}</div>
+                        <div className={styles.col}>
+                          {formattedBalance} {getTokenSymbol(token.symbol)}
+                        </div>
                         <div className={styles.col}>{ratio}%</div>
                         <div className={styles.col}>
                           {getTokensWithHighCorrelation(
@@ -918,6 +940,9 @@ export default function Position({
                         <span>Dollar Amount</span>
                       </div>
                       <div className={styles.col}>
+                        <span>Balance</span>
+                      </div>
+                      <div className={styles.col}>
                         <span>Position Ratio</span>
                       </div>
                       <div className={styles.col}>
@@ -932,8 +957,14 @@ export default function Position({
 
                       const tokenSymbol = getTokenSymbol(token.symbol);
 
-                      const value = token.value
+                      const formattedValue = token.value
                         ? token.value.toLocaleString("en-US", {
+                            maximumFractionDigits: 2,
+                          })
+                        : 0;
+
+                      const formattedBalance = token.balance
+                        ? token.balance.toLocaleString("en-US", {
                             maximumFractionDigits: 2,
                           })
                         : 0;
@@ -968,7 +999,10 @@ export default function Position({
                             />
                             {tokenSymbol}
                           </div>
-                          <div className={styles.col}>${value}</div>
+                          <div className={styles.col}>${formattedValue}</div>
+                          <div className={styles.col}>
+                            {formattedBalance} {getTokenSymbol(token.symbol)}
+                          </div>
                           <div className={styles.col}>{ratio}%</div>
                           <div className={styles.col}>
                             {getTokensWithHighCorrelation(
@@ -1007,7 +1041,8 @@ export default function Position({
                   <span>
                     ${getTotalLiquidationFee(protocol, covarianceMatrix)}
                   </span>
-                  , and the expected value at risk is{" "}
+                  . Based on the total supplied multiplied by the probability of
+                  liquidation, the expected value at risk is{" "}
                   <span>
                     {"$" +
                       (
