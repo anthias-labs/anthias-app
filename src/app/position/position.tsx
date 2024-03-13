@@ -223,7 +223,43 @@ export default function Position({
     return highCorrelationTokens.length === 0 ? ["NA"] : highCorrelationTokens;
   }
 
-  function getLiquidationFee(token, covarianceMatrix) {
+  function getTotalLiquidationFee(protocol, covarianceMatrix) {
+    let totalLiquidationFee = 0;
+
+    protocol.position.supplied.forEach((token) => {
+      const liquidationFee = getLiquidationFee(
+        token,
+        protocol,
+        covarianceMatrix
+      ).replace(/,/g, "");
+
+      totalLiquidationFee += Number(liquidationFee);
+    });
+
+    return totalLiquidationFee.toLocaleString("en-US", {
+      maximumFractionDigits: 2,
+    });
+  }
+
+  function getLiquidationFee(token, protocol, covarianceMatrix) {
+    if (!protocol.token_array) {
+      return "NA";
+    }
+
+    const tokenData = covarianceMatrix.token_data.find(
+      (tokenData) =>
+        tokenData.underlying_symbol === getTokenSymbol(token.symbol)
+    );
+
+    if (!tokenData) {
+      return "NA";
+    }
+
+    const liquidationFee = tokenData.liquidation_fee * token.value;
+
+    return liquidationFee.toLocaleString("en-US", {
+      maximumFractionDigits: 2,
+    });
   }
 
   function refreshRiskProfile(position) {
@@ -238,7 +274,8 @@ export default function Position({
         );
 
         return {
-          [protocol.protocol.protocol]: protocolRiskProfile,
+          [`${protocol.protocol.protocol}-${protocol.market}`]:
+            protocolRiskProfile,
         };
       })
       .reduce((acc, cur) => {
@@ -531,24 +568,30 @@ export default function Position({
       )}
       {position.length > 0 &&
         position.map((protocol, index) => {
+          if (protocol.total_supplied < 1) {
+            return <></>;
+          }
+
           const covarianceMatrix =
             covarianceMatrices[
               `${protocol.protocol.name}-v${protocol.protocol.version}-${protocol.protocol.chain}`
             ][protocol.market];
 
-          if (!riskProfile[protocol.protocol.protocol]) {
+          if (
+            !riskProfile[`${protocol.protocol.protocol}-${protocol.market}`]
+          ) {
             return <></>;
           }
 
           const formattedProbability = riskProfile[
-            protocol.protocol.protocol
+            `${protocol.protocol.protocol}-${protocol.market}`
           ].probability.toLocaleString("en-US", {
             style: "percent",
             maximumFractionDigits: 2,
           });
 
           const formattedDaysToLiquidation = riskProfile[
-            protocol.protocol.protocol
+            `${protocol.protocol.protocol}-${protocol.market}`
           ].daysToLiquidation.toLocaleString("en-US", {
             maximumFractionDigits: 0,
           });
@@ -857,7 +900,10 @@ export default function Position({
                             covarianceMatrix
                           ).join(", ")}
                         </div>
-                        <div className={styles.col}></div>
+                        <div className={styles.col}>
+                          $
+                          {getLiquidationFee(token, protocol, covarianceMatrix)}
+                        </div>
                       </div>
                     );
                   })}
@@ -952,6 +998,27 @@ export default function Position({
                   <span> {formattedProbability}</span>, and the time to reach a{" "}
                   <span>{probabilityCutoff * 100}%</span> probability of
                   liquidation is <span>{formattedDaysToLiquidation}</span> days.
+                  The total liquidation fee of{" "}
+                  <span>
+                    {formatAddress(address)}
+                    {"'"}s
+                  </span>{" "}
+                  position is{" "}
+                  <span>
+                    ${getTotalLiquidationFee(protocol, covarianceMatrix)}
+                  </span>
+                  , and the expected value at risk is{" "}
+                  <span>
+                    {"$" +
+                      (
+                        riskProfile[
+                          `${protocol.protocol.protocol}-${protocol.market}`
+                        ].probability * protocol.total_supplied
+                      ).toLocaleString("en-US", {
+                        maximumFractionDigits: 0,
+                      })}
+                  </span>
+                  .
                 </div>
               </div>
             </div>
