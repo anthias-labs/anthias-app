@@ -216,8 +216,8 @@ export default function Position({
       const correlation =
         covarianceMatrix.correlation[tokenAIndex][tokenBIndex];
 
-      // If absolute value of correlation is greater than 0.75
-      if (Math.abs(correlation) > 0.75) {
+      // If absolute value of correlation is greater than 0.6
+      if (Math.abs(correlation) > 0.6) {
         highCorrelationTokens.push(getTokenSymbol(tokenB));
       }
     });
