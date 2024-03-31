@@ -329,6 +329,7 @@ export default function Navbar({ protocols }) {
           href={
             "https://docs.anthias.xyz/how-to-use-anthias/a-guide-to-use-anthiass-new-compound-var-tools"
           }
+          target="_blank"
           rel="noreferrer"
           style={{ textDecoration: "none" }}
           className={styles.docs}
