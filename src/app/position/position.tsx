@@ -288,6 +288,13 @@ export default function Position({
   }
 
   function analyzeProtocol(covarianceMatrix, protocol, lookForward) {
+    if (!covarianceMatrix) {
+      return {
+        probability: "NA",
+        daysToLiquidation: "NA",
+      };
+    }
+
     let positionVector = {};
     const metadata = protocol.metadata[protocol.market];
 
