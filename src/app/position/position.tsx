@@ -317,7 +317,7 @@ export default function Position({
     const tokens = Object.keys(positionVector);
 
     tokens.forEach((tokenA) => {
-      tokenA = getTokenSymbol(tokenA);
+      // tokenA = getTokenSymbol(tokenA);
       let tokenAIndex =
         2 * covarianceMatrix.indexToToken[getTokenSymbol(tokenA.split("_")[0])];
       if (tokenA.includes("borrowed")) {
