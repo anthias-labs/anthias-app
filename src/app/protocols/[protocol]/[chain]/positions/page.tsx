@@ -31,9 +31,13 @@ export default async function PositionsPage({ params }) {
           view: "graph",
           name: "Graph",
         },
+        {
+          view: "liquidations",
+          name: "Liquidations",
+        },
       ],
 
-      icons: [tableImg, graphImg],
+      icons: [tableImg, graphImg, tableImg],
     },
 
     dataFetch: {

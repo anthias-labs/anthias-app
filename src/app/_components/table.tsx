@@ -10,6 +10,7 @@ import {
   roundedHealthFactor,
   getHealthFactorClass,
   toSnakeCase,
+  formatAddress,
 } from "@/app/_utils/textHandling";
 import Link from "next/link";
 import { Loader } from "@mantine/core";
@@ -204,6 +205,12 @@ export default function Table({
                             )}`;
                           } else if (key === "highest_collateral_factor") {
                             value = `${(Number(value.rate) * 100).toFixed(1)}%`;
+                          } else if (
+                            key === "id" ||
+                            key === "liquidator" ||
+                            key === "borrower"
+                          ) {
+                            value = formatAddress(value);
                           } else {
                             value = titleCase(data[key].toString());
                           }
