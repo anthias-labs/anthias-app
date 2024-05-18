@@ -211,6 +211,11 @@ export default function Table({
                             key === "borrower"
                           ) {
                             value = formatAddress(value);
+                          } else if (
+                            key === "supply_symbol" ||
+                            key === "borrow_symbol"
+                          ) {
+                            value = value.toUpperCase();
                           } else {
                             value = titleCase(data[key].toString());
                           }
