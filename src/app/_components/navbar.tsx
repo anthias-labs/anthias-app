@@ -68,6 +68,12 @@ export default function Navbar({ protocols }) {
                         value: "graph",
                         icon: graphImg || defaultImg,
                       },
+                      liquidations: {
+                        label: "Liquidations",
+                        value: "liquidations",
+                        icon: graphImg || defaultImg,
+                      },
+                      
                     },
                   },
                   // markets: {
