@@ -10,6 +10,7 @@ export default async function fetchProtocolLiquidations(
   const supabase = createServerActionClient({ cookies });
 
   let positionQuery = supabase.from(`${protocol}_liquidations`).select("*");
+  positionQuery = positionQuery.order("timestamp", { ascending: false });
 
   let keys = [];
 
@@ -38,7 +39,7 @@ export default async function fetchProtocolLiquidations(
 
   // If params don't contain paginate, set to default
   if (!keys.includes("paginate")) {
-    positionQuery = positionQuery.range(0, 9);
+    positionQuery = positionQuery.range(0, 29);
   }
 
   const { data: liquidationData, error: liquidationError } =

@@ -8,7 +8,7 @@ import { protocolToTitle } from "@/app/_utils/textHandling";
 
 export default async function LiquidationsTable({ params, searchParams }) {
   const protocol = params.chain;
-  const title = protocolToTitle(protocol) + " Liquidations";
+  const title = protocolToTitle(protocol) + " Liquidations (Last 30)";
 
   const urlSearchParams = new URLSearchParams(searchParams);
   const initialData = await fetchProtocolLiquidations(
@@ -23,20 +23,22 @@ export default async function LiquidationsTable({ params, searchParams }) {
     title: title,
 
     defaultFilters: {
-      sort: "timestamp",
-      limit: 10,
-      paginate: [1, 10],
+      // sort: "timestamp",
+      limit: 30,
+      paginate: [1, 30],
     },
 
     columns: {
       labels: [
-        "Tx ID",
+        "Transaction",
         "Supply Asset",
         "Borrow Asset",
         "Borrower",
         "Liquidator",
+        "Amount Repaid",
+        "Timestamp (Unix)"
       ],
-      keys: ["id", "supply_symbol", "borrow_symbol", "borrower", "liquidator"],
+      keys: ["id", "supply_symbol", "borrow_symbol", "borrower", "liquidator", "debt_repaid", "timestamp"],
     },
 
     link: {
@@ -51,7 +53,8 @@ export default async function LiquidationsTable({ params, searchParams }) {
     },
 
     // filters: {
-    //   protocol: protocol,
+    //   showProtocol: false,
+    //   // protocol: protocol,
     //   showTokens: false,
     // },
 

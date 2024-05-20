@@ -13,6 +13,7 @@ import walletsImg from "@/assets/icons/wallet.svg";
 import protocolsImg from "@/assets/icons/protocol.svg";
 import fishImg from "@/assets/icons/fish.svg";
 import tableImg from "@/assets/icons/table.svg";
+import liquidationsImg from "@/assets/icons/liquidations.svg";
 import graphImg from "@/assets/icons/graph.svg";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -67,6 +68,11 @@ export default function Navbar({ protocols }) {
                         label: "Graph",
                         value: "graph",
                         icon: graphImg || defaultImg,
+                      },
+                      liquidations: {
+                        label: "Liquidations",
+                        value: "liquidations",
+                        icon: liquidationsImg || defaultImg,
                       },
                     },
                   },
