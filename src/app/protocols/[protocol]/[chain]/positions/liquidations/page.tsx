@@ -6,12 +6,15 @@ import fetchProtocols from "@/app/_api/fetchProtocols";
 
 import { protocolToTitle } from "@/app/_utils/textHandling";
 
-export default async function PositionsLiquidations({ params, searchParams }) {
+export default async function LiquidationsTable({ params, searchParams }) {
   const protocol = params.chain;
-  const title = protocolToTitle(protocol) + " Liquidations";
+  const title = protocolToTitle(protocol) + " Liquidations (Last 30)";
 
   const urlSearchParams = new URLSearchParams(searchParams);
-  const initialData = await fetchProtocolLiquidations(protocol, urlSearchParams);
+  const initialData = await fetchProtocolLiquidations(
+    protocol,
+    urlSearchParams
+  );
 
   const protocols = await fetchProtocols();
   const thisProtocol = protocols.find((p) => p.protocol === params.chain);
@@ -20,26 +23,27 @@ export default async function PositionsLiquidations({ params, searchParams }) {
     title: title,
 
     defaultFilters: {
-      sort: "total_borrowed",
-      limit: 10,
-      paginate: [1, 10],
+      // sort: "timestamp",
+      limit: 30,
+      paginate: [1, 30],
     },
 
     columns: {
       labels: [
-        "Tx id",
-        "collateral",
-        "debt",
-        "borrow",
-        "liquidator",
-        "timestamp"
+        "Transaction",
+        "Supply Asset",
+        "Borrow Asset",
+        "Borrower",
+        "Liquidator",
+        "Amount Repaid",
+        "Timestamp (Unix)"
       ],
-      keys: ["id", "collateral_asset_symbol", "debt_asset_symbol", "borrower", "liquidator", "timestamp"],
+      keys: ["id", "supply_symbol", "borrow_symbol", "borrower", "liquidator", "debt_repaid", "timestamp"],
     },
 
     link: {
       base: thisProtocol.link,
-      key: "address",
+      key: "id",
       newTab: true,
     },
 
@@ -48,10 +52,11 @@ export default async function PositionsLiquidations({ params, searchParams }) {
       args: [protocol],
     },
 
-    filters: {
-      protocol: protocol,
-      showTokens: false,
-    },
+    // filters: {
+    //   showProtocol: false,
+    //   // protocol: protocol,
+    //   showTokens: false,
+    // },
 
     exports: false,
   };
