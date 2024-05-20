@@ -172,12 +172,11 @@ export default function Table({
                     >
                       <Link
                         href={
-                          tableProps.link.base ===
-                          "https://app.anthias.xyz/position"
-                            ? `/position?address=${data[tableProps.link.key]}`
-                            : `${tableProps.link.base}/${
-                                data[tableProps.link.key]
-                              }`
+                          tableProps.link.base === "https://app.anthias.xyz/position"
+                          ? `/position?address=${data[tableProps.link.key]}`
+                          : tableProps.link.base === "https://explorer.mode.network/tx/"
+                          ? `${tableProps.link.base}/${data[tableProps.link.key].slice(0, 66)}`
+                          : `${tableProps.link.base}/${data[tableProps.link.key]}`
                         }
                         target={tableProps.link.newTab ? "_blank" : ""}
                         className={styles.tr}

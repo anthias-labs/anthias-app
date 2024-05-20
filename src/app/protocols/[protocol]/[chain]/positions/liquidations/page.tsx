@@ -42,7 +42,7 @@ export default async function LiquidationsTable({ params, searchParams }) {
     },
 
     link: {
-      base: thisProtocol.link,
+      base: 'https://explorer.mode.network/tx/',
       key: "id",
       newTab: true,
     },
