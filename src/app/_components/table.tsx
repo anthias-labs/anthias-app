@@ -34,6 +34,8 @@ export default function Table({
   );
   const tableRef = useRef();
 
+  console.log("table props: ", tableProps);
+
   useEffect(() => {
     setSortMode(searchParams.getAll("sort")[0]);
 
@@ -103,6 +105,7 @@ export default function Table({
         <div className={styles.section}>
           {tableProps.filters && (
             <Filters
+              sort={tableProps.filters.sort}
               protocol={tableProps.filters.protocol}
               showTokens={tableProps.filters.showTokens || false}
             />
@@ -172,11 +175,17 @@ export default function Table({
                     >
                       <Link
                         href={
-                          tableProps.link.base === "https://app.anthias.xyz/position"
-                          ? `/position?address=${data[tableProps.link.key]}`
-                          : tableProps.link.base === "https://explorer.mode.network/tx/"
-                          ? `${tableProps.link.base}/${data[tableProps.link.key].slice(0, 66)}`
-                          : `${tableProps.link.base}/${data[tableProps.link.key]}`
+                          tableProps.link.base ===
+                          "https://app.anthias.xyz/position"
+                            ? `/position?address=${data[tableProps.link.key]}`
+                            : tableProps.link.base ===
+                              "https://explorer.mode.network/tx/"
+                            ? `${tableProps.link.base}/${data[
+                                tableProps.link.key
+                              ].slice(0, 66)}`
+                            : `${tableProps.link.base}/${
+                                data[tableProps.link.key]
+                              }`
                         }
                         target={tableProps.link.newTab ? "_blank" : ""}
                         className={styles.tr}
@@ -215,6 +224,10 @@ export default function Table({
                             key === "borrow_symbol"
                           ) {
                             value = value.toUpperCase();
+                          } else if (key == "price_volatility") {
+                            value = value + "%";
+                          } else if (key == "risk_level") {
+                            value = value + " / 100";
                           } else {
                             value = titleCase(data[key].toString());
                           }

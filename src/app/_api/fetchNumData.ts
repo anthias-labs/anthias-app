@@ -27,7 +27,6 @@ export default async function fetchNumData(protocol: string, params = null) {
     if (params) {
       // Convert params to 2d
       params = Array.from(params.entries());
-
       // First loop through to see if tokens are present
       for (const [index, entry] of params.entries()) {
         const [key, value] = entry;
@@ -61,6 +60,7 @@ export default async function fetchNumData(protocol: string, params = null) {
         }
       }
     }
+
     if (!filteringTokens) {
       const { data, error, count: fetchedCount } = await numPositionQuery;
 

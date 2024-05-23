@@ -52,11 +52,12 @@ export default async function LiquidationsTable({ params, searchParams }) {
       args: [protocol],
     },
 
-    // filters: {
-    //   showProtocol: false,
-    //   // protocol: protocol,
-    //   showTokens: false,
-    // },
+    filters: {
+      showProtocol: false,
+      protocol: protocol,
+      sort: "timestamp",
+      showTokens: false,
+    },
 
     exports: false,
   };

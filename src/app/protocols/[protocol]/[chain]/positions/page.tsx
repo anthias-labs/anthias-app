@@ -3,6 +3,7 @@
 import tableImg from "@/assets/icons/table.svg";
 import graphImg from "@/assets/icons/graph.svg";
 import liquidationsImg from "@/assets/icons/liquidations.svg";
+import riskImg from "@/assets/icons/risk.svg"
 
 import fetchProtocolsUnique from "@/app/_api/fetchProtocolsUnique";
 import fetchProtocolIcons from "@/app/_api/fetchProtocolIcons";
@@ -36,6 +37,10 @@ export default async function PositionsPage({ params }) {
           view: "liquidations",
           name: "Liquidations",
         },
+        // {
+        //   view: "risk",
+        //   name: "Market State",
+        // },
       ],
 
       icons: [tableImg, graphImg, liquidationsImg],

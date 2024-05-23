@@ -14,6 +14,7 @@ export default async function PositionsTable({ params, searchParams }) {
   const initialData = await fetchProtocolAddresses(protocol, urlSearchParams);
 
   const protocols = await fetchProtocols();
+
   const thisProtocol = protocols.find((p) => p.protocol === params.chain);
 
   const tableProps = {
@@ -49,6 +50,7 @@ export default async function PositionsTable({ params, searchParams }) {
     filters: {
       protocol: protocol,
       showTokens: true,
+      sort: "total_borrowed",
     },
 
     exports: true,

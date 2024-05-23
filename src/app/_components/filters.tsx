@@ -23,12 +23,14 @@ import fetchProtocolMarkets from "../_api/fetchProtocolMarketsClient";
 import Image from "next/image";
 
 export default function FilterBar({
+  sort,
   protocol,
   showProtocol = false,
   showTokens = false,
 }) {
+
   const defaultFilters = {
-    sort: "total_borrowed",
+    sort: sort,
     limit: 10,
     paginate: [1, 10],
     tokens: [],
@@ -241,6 +243,21 @@ export default function FilterBar({
     });
   }
 
+  function updateQueryParams(filters) {
+    let newParams = new URLSearchParams();
+
+    if (filters.sort) {
+      newParams.set("sort", filters.sort);
+    }
+
+    newParams.set("limit", filters.limit);
+    newParams.set("paginate", filters.paginate.join(","));
+    newParams.set("tokens", filters.tokens.join(","));
+    newParams.set("health_factor", filters.health_factor.join(","));
+
+    router.push(`${currentPath}?${newParams.toString()}`, { scroll: false });
+  }
+
   // function updateQueryParams(filters) {
   //   let newParams = new URLSearchParams();
 
@@ -248,40 +265,24 @@ export default function FilterBar({
   //     newParams.set("sort", filters.sort);
   //   }
 
-  //   newParams.set("limit", filters.limit);
-  //   newParams.set("paginate", filters.paginate.join(","));
-  //   newParams.set("tokens", filters.tokens.join(","));
-  //   newParams.set("health_factor", filters.health_factor.join(","));
+  //   if (filters.limit) {
+  //     newParams.set("limit", filters.limit);
+  //   }
+
+  //   if (filters.paginate && filters.paginate.length > 0) {
+  //     newParams.set("paginate", filters.paginate.join(","));
+  //   }
+
+  //   if (filters.tokens && filters.tokens.length > 0) {
+  //     newParams.set("tokens", filters.tokens.join(","));
+  //   }
+
+  //   if (filters.health_factor && filters.health_factor.length > 0) {
+  //     newParams.set("health_factor", filters.health_factor.join(","));
+  //   }
 
   //   router.push(`${currentPath}?${newParams.toString()}`, { scroll: false });
   // }
-
-  function updateQueryParams(filters) {
-    let newParams = new URLSearchParams();
-
-    if (filters.sort) {
-      newParams.set("sort", filters.sort);
-    }
-  
-    if (filters.limit) {
-      newParams.set("limit", filters.limit);
-    }
-  
-    if (filters.paginate && filters.paginate.length > 0) {
-      newParams.set("paginate", filters.paginate.join(","));
-    }
-  
-    if (filters.tokens && filters.tokens.length > 0) {
-      newParams.set("tokens", filters.tokens.join(","));
-    }
-  
-    if (filters.health_factor && filters.health_factor.length > 0) {
-      newParams.set("health_factor", filters.health_factor.join(","));
-    }
-  
-    router.push(`${currentPath}?${newParams.toString()}`, { scroll: false });
-  }
-  
 
   return (
     <div className={styles.filters}>
