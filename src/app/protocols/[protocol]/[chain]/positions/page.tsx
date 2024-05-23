@@ -10,6 +10,33 @@ import fetchProtocolIcons from "@/app/_api/fetchProtocolIcons";
 import Table from "@/app/_components/table";
 
 export default async function PositionsPage({ params }) {
+  const directory =
+    params.chain === "ionic_v1_mode"
+      ? [
+          {
+            view: "table",
+            name: "Table",
+          },
+          {
+            view: "graph",
+            name: "Graph",
+          },
+          {
+            view: "liquidations",
+            name: "Liquidations",
+          },
+        ]
+      : [
+          {
+            view: "table",
+            name: "Table",
+          },
+          {
+            view: "graph",
+            name: "Graph",
+          },
+        ];
+
   const tableProps = {
     title: "Select a View",
 
@@ -24,24 +51,7 @@ export default async function PositionsPage({ params }) {
     },
 
     customData: {
-      data: [
-        {
-          view: "table",
-          name: "Table",
-        },
-        {
-          view: "graph",
-          name: "Graph",
-        },
-        {
-          view: "liquidations",
-          name: "Liquidations",
-        },
-        // {
-        //   view: "risk",
-        //   name: "Market State",
-        // },
-      ],
+      data: directory,
 
       icons: [tableImg, graphImg, liquidationsImg],
     },
