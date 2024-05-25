@@ -20,7 +20,7 @@ export default async function fetchProtocolLiquidations(
     keys.push(key);
 
     if (key === "search") {
-      positionQuery = positionQuery.ilike("address", `%${value}%`);
+      positionQuery = positionQuery.ilike("borrower", `%${value}%`);
     } else if (key === "paginate") {
       const values = value.split(",");
 

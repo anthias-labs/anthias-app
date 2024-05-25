@@ -8,7 +8,7 @@ import { protocolToTitle } from "@/app/_utils/textHandling";
 
 export default async function LiquidationsTable({ params, searchParams }) {
   const protocol = params.chain;
-  const title = protocolToTitle(protocol) + " Liquidations (Last 30)";
+  const title = protocolToTitle(protocol) + " Liquidations";
 
   const urlSearchParams = new URLSearchParams(searchParams);
   const initialData = await fetchProtocolLiquidations(
@@ -35,7 +35,7 @@ export default async function LiquidationsTable({ params, searchParams }) {
         "Borrow Asset",
         "Borrower",
         "Liquidator",
-        "Amount Repaid",
+        "Amount Repaid ($)",
         "Timestamp (Unix)"
       ],
       keys: ["id", "supply_symbol", "borrow_symbol", "borrower", "liquidator", "debt_repaid", "timestamp"],

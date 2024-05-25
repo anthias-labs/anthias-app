@@ -228,6 +228,13 @@ export default function Table({
                             value = value + "%";
                           } else if (key == "risk_level") {
                             value = value + " / 100";
+                          } else if (key == "risk_level") {
+                            value = value + " / 100";
+                          } else if (key === "debt_repaid") {
+                            value = `$${moneyToRoundedString(
+                              Number(value),
+                              2
+                            )}`;
                           } else {
                             value = titleCase(data[key].toString());
                           }
