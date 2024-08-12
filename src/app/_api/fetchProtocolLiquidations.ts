@@ -8,6 +8,8 @@ export default async function fetchProtocolLiquidations(
   params
 ) {
   const supabase = createServerActionClient({ cookies });
+  console.log('hiii')
+
 
   let positionQuery = supabase.from(`${protocol}_liquidations`).select("*");
   positionQuery = positionQuery.order("timestamp", { ascending: false });

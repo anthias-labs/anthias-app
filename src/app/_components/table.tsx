@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 import { titleCase } from "@/app/_utils/textHandling";
 import Image from "next/image";
 import defaultImg from "@/assets/icons/defaultProtocol.svg";
+import { format } from 'date-fns';
 
 export default function Table({
   tableProps,
@@ -230,6 +231,9 @@ export default function Table({
                             value = value + " / 100";
                           } else if (key == "risk_level") {
                             value = value + " / 100";
+                          } else if (key == "timestamp") {
+                            const timestamp = parseInt(value, 10); // Convert string to number
+                            value =  format(new Date(timestamp * 1000), 'PPpp')
                           } else if (key === "debt_repaid") {
                             value = `$${moneyToRoundedString(
                               Number(value),
